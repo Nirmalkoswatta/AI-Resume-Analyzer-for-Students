@@ -1,0 +1,77 @@
+version: "2026.09.1"
+
+checks:
+  machine_readable_text:
+    label: Selectable text layer
+    weight: 0.25
+    severity: critical
+    passed: The document contains real text rather than a scanned image.
+    failed: >-
+      This resume has no selectable text, so an applicant tracking system reads nothing at all.
+    fix_title: Export a PDF instead of scanning a printout
+    fix_detail: >-
+      Nothing in this file can be read as text. Export directly from your word processor so the
+      words stay selectable.
+
+  single_column_layout:
+    label: Single-column layout
+    weight: 0.25
+    severity: critical
+    passed: Content flows in a single column, which is the order a parser reads.
+    failed: >-
+      Two text columns were detected. Most applicant tracking systems read straight across the
+      page and will interleave the columns into unreadable text.
+    fix_title: Switch to a single-column layout
+    fix_detail: >-
+      Move any sidebar content into the main flow so a parser reads your resume in the same
+      order a person does.
+
+  no_layout_tables:
+    label: No tables used for layout
+    weight: 0.15
+    severity: high
+    passed: No tables were found, so nothing depends on a parser reconstructing cells.
+    failed: >-
+      Content sits inside a table. Many parsers flatten tables into a single line or skip them.
+    fix_title: Replace tables with plain paragraphs
+    fix_detail: >-
+      Rebuild the tabled sections as ordinary lines of text. Tabs and spacing survive parsing;
+      table cells often do not.
+
+  text_outside_header_footer:
+    label: No content in headers or footers
+    weight: 0.15
+    severity: high
+    passed: All content sits in the body of the page where parsers look.
+    failed: >-
+      Some text sits in the page header or footer, where most parsers never look. Contact
+      details placed there are commonly lost.
+    fix_title: Move content out of the page header and footer
+    fix_detail: >-
+      Put your name, email and phone number in the body of the first page. Anything left in a
+      header or footer may never reach the recruiter.
+
+  recognisable_section_headings:
+    label: Recognisable section headings
+    weight: 0.12
+    severity: medium
+    passed: Headings map onto the sections a parser expects to find.
+    failed: >-
+      Some headings could not be matched to a standard section name, so the content beneath
+      them may be filed under the wrong field.
+    fix_title: Use conventional section headings
+    fix_detail: >-
+      Prefer plain names such as Education, Experience, Skills and Projects. Creative headings
+      read well to a person but confuse the parser that sorts your resume first.
+
+  appropriate_length:
+    label: Appropriate length
+    weight: 0.08
+    severity: low
+    passed: The length is right for a student resume.
+    failed: >-
+      This runs longer than one page. Most student resumes are stronger cut back to a single page.
+    fix_title: Cut this down to one page
+    fix_detail: >-
+      Keep the most recent and most relevant material. A single focused page reads better than
+      two padded ones.

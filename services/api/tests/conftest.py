@@ -1,9 +1,14 @@
 from collections.abc import Iterator
+from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
 
+from app.config import Settings, get_settings
 from app.main import create_app
+from tests import pdf_builder
+
+FIXTURES = Path(__file__).parent / "fixtures"
 
 
 @pytest.fixture
@@ -13,11 +18,45 @@ def client() -> Iterator[TestClient]:
 
 
 @pytest.fixture
-def minimal_pdf() -> bytes:
-    return (
-        b"%PDF-1.4\n"
-        b"1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n"
-        b"2 0 obj<</Type/Pages/Kids[]/Count 0>>endobj\n"
-        b"trailer<</Root 1 0 R>>\n"
-        b"%%EOF\n"
-    )
+def settings() -> Settings:
+    return get_settings()
+
+
+@pytest.fixture
+def sample_resume() -> bytes:
+    return (FIXTURES / "sample_resume.pdf").read_bytes()
+
+
+@pytest.fixture
+def single_column_pdf() -> bytes:
+    return pdf_builder.single_column_resume()
+
+
+@pytest.fixture
+def two_column_pdf() -> bytes:
+    return pdf_builder.two_column_resume()
+
+
+@pytest.fixture
+def header_footer_pdf() -> bytes:
+    return pdf_builder.resume_with_header_footer_text()
+
+
+@pytest.fixture
+def creative_headings_pdf() -> bytes:
+    return pdf_builder.resume_with_creative_headings()
+
+
+@pytest.fixture
+def scanned_pdf() -> bytes:
+    return pdf_builder.scanned_resume()
+
+
+@pytest.fixture
+def encrypted_pdf() -> bytes:
+    return pdf_builder.encrypted_resume()
+
+
+@pytest.fixture
+def twelve_page_pdf() -> bytes:
+    return pdf_builder.multi_page_resume(12)

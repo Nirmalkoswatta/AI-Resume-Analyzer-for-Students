@@ -6,6 +6,8 @@ requires-python = ">=3.12"
 dependencies = [
     "fastapi>=0.115",
     "pydantic>=2.9",
+    "pymupdf>=1.26",
+    "pyyaml>=6.0",
     "pydantic-settings>=2.5",
     "python-multipart>=0.0.20",
     "uvicorn[standard]>=0.32",
@@ -16,6 +18,7 @@ dev = [
     "httpx>=0.28",
     "mypy>=1.13",
     "pytest>=8.3",
+    "types-pyyaml>=6.0",
     "ruff>=0.8",
 ]
 
@@ -43,6 +46,11 @@ strict = true
 warn_unreachable = true
 disallow_any_explicit = false
 plugins = ["pydantic.mypy"]
+
+[[tool.mypy.overrides]]
+module = ["pymupdf", "pymupdf.*"]
+follow_imports = "skip"
+ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

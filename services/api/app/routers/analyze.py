@@ -3,7 +3,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, File, Form, UploadFile
 
 from app.config import Settings, get_settings
-from app.fixtures import build_fixture_result
+from app.pipeline.analysis import analyze_resume
 from app.schemas.analysis import AnalysisResult
 from app.schemas.errors import ErrorResponse
 from app.upload import read_validated_upload
@@ -32,5 +32,5 @@ async def analyze(
         ),
     ] = None,
 ) -> AnalysisResult:
-    await read_validated_upload(resume, settings)
-    return build_fixture_result(job_description)
+    payload = await read_validated_upload(resume, settings)
+    return analyze_resume(payload, job_description, settings)

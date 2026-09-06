@@ -96,13 +96,40 @@ golden-file tests possible. Thresholds and rubric weights live in config, never 
 TypeScript is strict with no `any`. API types come from `packages/schema`. Server
 Components by default.
 
+## The pipeline
+
+`app/pipeline/` runs in order, each stage a pure function over the previous stage's output:
+
+| Stage | Does | Trained? |
+| --- | --- | --- |
+| `ingest` | PyMuPDF to `Document`: lines, spans, fonts, sizes, bounding boxes, columns | No |
+| `segment` | Lines to sections using `resources/headings.yaml` plus font and case signals | No |
+| `ats` | Weighted rubric from `resources/ats_rubric.yaml` | No |
+| `advise` | Failed checks and missing sections to prioritised suggestions | No |
+| `skills` | Gazetteer plus CRF | Planned |
+| `fit` | Role classifier plus job-description similarity | Planned |
+
+`ingest` is the only module that touches PyMuPDF. Everything downstream reads the
+`Document` dataclass, so nothing else depends on the PDF library.
+
+### Tuning without touching code
+
+Both YAML files under `app/resources/` are the knobs. `headings.yaml` holds heading
+synonyms, which sections are expected, and the advice shown when one is missing;
+`ats_rubric.yaml` holds each check's weight, severity, wording, and the fix it produces.
+Adding a heading synonym or reweighting a check is a config change and a test, not a code
+change. Bump `version` in the rubric whenever weights move, so a changed score can always
+be explained.
+
 ## Current state
 
-Milestone 1. The pipeline returns a fixture so the contract, the UI, and the report are
-real and testable end to end; PDF parsing and the models are not wired up yet.
+Ingestion, segmentation, ATS scoring, and suggestions run on the real uploaded file.
+Scores are deterministic and every check is shown with its reasoning.
 
-Working now: upload validation (size, MIME type, PDF magic bytes), typed error responses
-with remediation text, the full report UI, job-description gap display, health endpoint,
-OpenAPI codegen, and CI.
+Detected and rejected with typed errors: scanned image resumes, encrypted PDFs, corrupt
+files, documents over the page limit, oversized uploads, and non-PDFs renamed to `.pdf`.
 
-Next: PyMuPDF ingestion and layout extraction, then the ATS rubric and suggestion engine.
+Still fixtures, clearly isolated in `app/fixtures.py`: extracted skills and role fit. These
+need the gazetteer and the trained models.
+
+Next: the ESCO/O*NET skill gazetteer and skill extraction, then the role classifier.
