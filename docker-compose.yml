@@ -1,0 +1,22 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: infra/Dockerfile.api
+    ports:
+      - "8000:8000"
+    environment:
+      RESUME_API_ALLOWED_ORIGINS: '["http://localhost:3000"]'
+      RESUME_API_LOG_LEVEL: info
+
+  web:
+    build:
+      context: .
+      dockerfile: infra/Dockerfile.web
+    ports:
+      - "3000:3000"
+    environment:
+      RESUME_API_URL: http://api:8000
+    depends_on:
+      api:
+        condition: service_healthy

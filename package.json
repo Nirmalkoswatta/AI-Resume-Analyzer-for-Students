@@ -1,0 +1,22 @@
+{
+  "name": "ai-resume-analyzer",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace @resume/web",
+    "build": "npm run build --workspace @resume/web",
+    "lint": "npm run lint --workspace @resume/web",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "schema:types": "openapi-typescript packages/schema/openapi.json -o packages/schema/src/api.d.ts"
+  },
+  "devDependencies": {
+    "openapi-typescript": "^7.9.1"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

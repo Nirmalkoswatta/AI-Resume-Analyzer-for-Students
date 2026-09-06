@@ -1,0 +1,98 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  api:
+    name: API
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/api
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install
+        run: pip install -e ".[dev]"
+
+      - name: Lint
+        run: ruff check .
+
+      - name: Format
+        run: ruff format --check .
+
+      - name: Types
+        run: mypy app scripts
+
+      - name: Tests
+        run: pytest
+
+  web:
+    name: Web
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "24"
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Types
+        run: npm run typecheck --workspace @resume/web
+
+      - name: Build
+        run: npm run build
+
+  contract:
+    name: API contract is in sync
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "24"
+          cache: npm
+
+      - name: Install
+        run: |
+          pip install -e "./services/api[dev]"
+          npm ci
+
+      - name: Regenerate spec and types
+        run: |
+          python services/api/scripts/export_openapi.py
+          npm run schema:types
+
+      - name: Fail if the committed contract is stale
+        run: |
+          if [ -n "$(git status --porcelain -- packages/schema)" ]; then
+            git diff -- packages/schema
+            git status --porcelain -- packages/schema
+            echo "::error::packages/schema is out of date. Run services/api/scripts/export_openapi.py and npm run schema:types, then commit the result."
+            exit 1
+          fi
