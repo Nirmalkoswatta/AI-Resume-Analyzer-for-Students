@@ -106,7 +106,7 @@ Components by default.
 | `segment` | Lines to sections using `resources/headings.yaml` plus font and case signals | No |
 | `ats` | Weighted rubric from `resources/ats_rubric.yaml` | No |
 | `advise` | Failed checks and missing sections to prioritised suggestions | No |
-| `skills` | Gazetteer plus CRF | Planned |
+| `skills` | Taxonomy match over `resources/skills.yaml`, with fuzzy recovery | No |
 | `fit` | Role classifier plus job-description similarity | Planned |
 
 `ingest` is the only module that touches PyMuPDF. Everything downstream reads the
@@ -121,15 +121,60 @@ Adding a heading synonym or reweighting a check is a config change and a test, n
 change. Bump `version` in the rubric whenever weights move, so a changed score can always
 be explained.
 
+## Skill extraction
+
+Skills come from `resources/skills.yaml` — a seed taxonomy of 105 skills and 272
+matchable surface forms, authored in-repo so there is no licensing encumbrance.
+
+Two matching rules carry most of the weight:
+
+- **Ambiguous short names are restricted to the Skills section.** `C`, `R`, and `Go` are
+  marked `strict` in the taxonomy and are only matched there, with original casing. A resume
+  saying "helped students go through lab exercises" does not know Go.
+- **A skill is `demonstrated` only when it appears in Experience, Projects, or
+  Publications.** Anywhere else it is `claimed`. That distinction drives both the UI grouping
+  and the suggestion to go back and evidence a claim.
+
+Typos are recovered with `rapidfuzz` above a 92 similarity threshold on tokens of six
+characters or more, at reduced confidence, so a fuzzy hit is always distinguishable from an
+exact one. Adding a skill or alias is a YAML edit.
+
+### Swapping in a full taxonomy
+
+`ml/build_gazetteer.py` converts an O*NET or ESCO export into the same file:
+
+```bash
+python ml/build_gazetteer.py --source onet --input "path/to/Technology Skills.txt" --version 2026.09
+```
+
+Download the source yourself — both sit behind a licence someone has to read and accept,
+and both require attribution in the product if you ship a derived gazetteer.
+**O*NET** (onetcenter.org/database.html, CC BY 4.0) is the better fit: its Technology
+Skills file is a clean list of concrete tool names. **ESCO** (esco.ec.europa.eu, CC BY 4.0)
+labels competences as verb phrases — you get `use Python`, not `Python` — so it needs a
+verb-stripping pass before it matches resume text well.
+
+After regenerating, run the API tests. `test_skills.py` asserts the taxonomy loads, ids are
+unique, and known aliases resolve, which is the guard against a bad conversion.
+
 ## Current state
 
-Ingestion, segmentation, ATS scoring, and suggestions run on the real uploaded file.
-Scores are deterministic and every check is shown with its reasoning.
+Ingestion, segmentation, ATS scoring, skill extraction, and suggestions all run on the real
+uploaded file. Scores are deterministic and every check is shown with its reasoning.
 
 Detected and rejected with typed errors: scanned image resumes, encrypted PDFs, corrupt
 files, documents over the page limit, oversized uploads, and non-PDFs renamed to `.pdf`.
 
-Still fixtures, clearly isolated in `app/fixtures.py`: extracted skills and role fit. These
-need the gazetteer and the trained models.
+Still a fixture, isolated in `app/fixtures.py`: role fit and job-description matching. That
+needs the trained classifier and the sentence encoder.
 
-Next: the ESCO/O*NET skill gazetteer and skill extraction, then the role classifier.
+Next, all landing in `ml/` and loaded by the API as finished artefacts:
+
+- **Role classifier** — TF-IDF into LinearSVC over a public resume corpus. Dedupe by cosine
+  similarity before splitting; near-duplicate resumes across the split inflate accuracy badly.
+- **Skill NER** — `sklearn-crfsuite` over the public annotated resume set, to catch skills
+  absent from the taxonomy. A supplement to the gazetteer, never a replacement.
+- **Job-description matching** — `all-MiniLM-L6-v2` embeddings alongside the keyword gap.
+
+Strip PII at ingest before training on any public resume corpus. Those datasets contain
+real people's names, emails, and phone numbers, and nothing downstream needs identity.

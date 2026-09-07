@@ -74,19 +74,19 @@ def test_scoring_is_deterministic(two_column_pdf: bytes, settings: Settings) -> 
 
 def test_failed_checks_become_suggestions(two_column_pdf: bytes, settings: Settings) -> None:
     score = score_of(two_column_pdf, settings)
-    suggestions = advise(score, [])
+    suggestions = advise(score, [], [])
 
     assert any(suggestion.id == "ats.single_column_layout" for suggestion in suggestions)
 
 
 def test_passed_checks_produce_no_suggestions(single_column_pdf: bytes, settings: Settings) -> None:
-    suggestions = advise(score_of(single_column_pdf, settings), [])
+    suggestions = advise(score_of(single_column_pdf, settings), [], [])
 
     assert suggestions == []
 
 
 def test_missing_sections_become_suggestions(single_column_pdf: bytes, settings: Settings) -> None:
-    suggestions = advise(score_of(single_column_pdf, settings), [SectionKind.SUMMARY])
+    suggestions = advise(score_of(single_column_pdf, settings), [SectionKind.SUMMARY], [])
 
     assert [suggestion.id for suggestion in suggestions] == ["section.summary"]
     assert suggestions[0].section is SectionKind.SUMMARY
@@ -95,7 +95,7 @@ def test_missing_sections_become_suggestions(single_column_pdf: bytes, settings:
 def test_suggestions_are_ordered_by_severity(two_column_pdf: bytes, settings: Settings) -> None:
     order = {Severity.CRITICAL: 0, Severity.HIGH: 1, Severity.MEDIUM: 2, Severity.LOW: 3}
     suggestions = advise(
-        score_of(two_column_pdf, settings), [SectionKind.SUMMARY, SectionKind.EDUCATION]
+        score_of(two_column_pdf, settings), [SectionKind.SUMMARY, SectionKind.EDUCATION], []
     )
     ranks = [order[suggestion.severity] for suggestion in suggestions]
 

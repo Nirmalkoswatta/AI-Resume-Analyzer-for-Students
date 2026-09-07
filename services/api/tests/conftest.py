@@ -60,3 +60,13 @@ def encrypted_pdf() -> bytes:
 @pytest.fixture
 def twelve_page_pdf() -> bytes:
     return pdf_builder.multi_page_resume(12)
+
+
+@pytest.fixture
+def ambiguous_skills_pdf() -> bytes:
+    return pdf_builder.resume_with_ambiguous_skills()
+
+
+@pytest.fixture
+def misspelled_skills_pdf() -> bytes:
+    return pdf_builder.resume_with_misspelled_skills()

@@ -6,8 +6,8 @@ import yaml
 
 from app.pipeline.ats import get_rubric
 from app.pipeline.lexicon import HEADINGS_PATH
-from app.schemas.analysis import AtsScore, Suggestion
-from app.schemas.enums import SectionKind, Severity
+from app.schemas.analysis import AtsScore, Skill, Suggestion
+from app.schemas.enums import EvidenceStrength, SectionKind, Severity
 
 SEVERITY_ORDER = {
     Severity.CRITICAL: 0,
@@ -38,10 +38,16 @@ def get_missing_section_advice() -> dict[SectionKind, MissingSectionAdvice]:
     }
 
 
-def advise(ats: AtsScore, missing_sections: list[SectionKind]) -> list[Suggestion]:
+MAX_NAMED_SKILLS = 3
+
+
+def advise(
+    ats: AtsScore, missing_sections: list[SectionKind], skills: list[Skill]
+) -> list[Suggestion]:
     suggestions = [
         *suggestions_from_failed_checks(ats),
         *suggestions_from_missing_sections(missing_sections),
+        *suggestions_from_unevidenced_skills(skills),
     ]
     return sorted(suggestions, key=lambda suggestion: SEVERITY_ORDER[suggestion.severity])
 
@@ -74,4 +80,27 @@ def suggestions_from_missing_sections(missing_sections: list[SectionKind]) -> li
         )
         for kind in missing_sections
         if kind in advice
+    ]
+
+
+def suggestions_from_unevidenced_skills(skills: list[Skill]) -> list[Suggestion]:
+    claimed = [skill for skill in skills if skill.evidence is EvidenceStrength.CLAIMED]
+    if not claimed:
+        return []
+
+    named = ", ".join(skill.name for skill in claimed[:MAX_NAMED_SKILLS])
+    remainder = len(claimed) - MAX_NAMED_SKILLS
+    subject = f"{named} and {remainder} more" if remainder > 0 else named
+
+    return [
+        Suggestion(
+            id="skills.unevidenced",
+            severity=Severity.MEDIUM,
+            title=f"Show where you used {subject}",
+            detail=(
+                "These appear only in your skills list. Mention each one inside an experience "
+                "or project bullet so a recruiter can see the claim is backed by something."
+            ),
+            section=SectionKind.SKILLS,
+        )
     ]

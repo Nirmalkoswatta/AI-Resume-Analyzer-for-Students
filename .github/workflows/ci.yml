@@ -39,6 +39,29 @@ jobs:
       - name: Tests
         run: pytest
 
+  ml:
+    name: ML scripts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install
+        run: pip install "ruff>=0.8" "mypy>=1.13" "pyyaml>=6.0" "types-pyyaml>=6.0"
+
+      - name: Lint
+        run: ruff check ml
+
+      - name: Format
+        run: ruff format --check ml
+
+      - name: Types
+        run: mypy ml --strict --ignore-missing-imports
+
   web:
     name: Web
     runs-on: ubuntu-latest

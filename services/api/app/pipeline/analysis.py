@@ -2,12 +2,13 @@ from datetime import UTC, datetime
 from uuid import uuid4
 
 from app.config import MODEL_VERSION, RUBRIC_VERSION, Settings
-from app.fixtures import fixture_role_fit, fixture_skills
+from app.fixtures import fixture_role_fit
 from app.pipeline.advise import advise
 from app.pipeline.ats import evaluate
 from app.pipeline.document import Document
 from app.pipeline.ingest import parse_document
 from app.pipeline.segment import segment
+from app.pipeline.skills import extract_skills
 from app.schemas.analysis import AnalysisResult, DocumentStats
 
 
@@ -16,6 +17,7 @@ def analyze_resume(
 ) -> AnalysisResult:
     document = parse_document(payload, settings)
     sections, missing_sections = segment(document)
+    skills = extract_skills(document, sections)
     ats = evaluate(document, sections)
 
     return AnalysisResult(
@@ -26,10 +28,10 @@ def analyze_resume(
         document=describe_document(document),
         sections=sections,
         missing_sections=missing_sections,
-        skills=fixture_skills(),
+        skills=skills,
         ats=ats,
         fit=fixture_role_fit(job_description),
-        suggestions=advise(ats, missing_sections),
+        suggestions=advise(ats, missing_sections, skills),
     )
 
 

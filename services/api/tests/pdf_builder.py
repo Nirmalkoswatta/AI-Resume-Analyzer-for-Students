@@ -143,3 +143,32 @@ def to_bytes(document: pymupdf.Document) -> bytes:
     payload: bytes = document.tobytes()
     document.close()
     return payload
+
+
+def resume_with_ambiguous_skills() -> bytes:
+    document = new_document()
+    page = document.new_page(width=PAGE_WIDTH, height=PAGE_HEIGHT)
+    lines = [
+        ("WORK EXPERIENCE", HEADING_FONT_SIZE),
+        ("Teaching Assistant, University of Colombo", BODY_FONT_SIZE),
+        ("Helped students go through lab exercises each week", BODY_FONT_SIZE),
+        ("Marked coursework and gave written feedback", BODY_FONT_SIZE),
+        ("SKILLS", HEADING_FONT_SIZE),
+        ("C, R, Go, Python", BODY_FONT_SIZE),
+    ]
+    write_lines(page, lines, LEFT_COLUMN_X, 140.0)
+    return to_bytes(document)
+
+
+def resume_with_misspelled_skills() -> bytes:
+    document = new_document()
+    page = document.new_page(width=PAGE_WIDTH, height=PAGE_HEIGHT)
+    lines = [
+        ("WORK EXPERIENCE", HEADING_FONT_SIZE),
+        ("Software Engineering Intern, Reddy Labs", BODY_FONT_SIZE),
+        ("Deployed services with Kubernets and Dockr", BODY_FONT_SIZE),
+        ("SKILLS", HEADING_FONT_SIZE),
+        ("Javascripts, Kubernets", BODY_FONT_SIZE),
+    ]
+    write_lines(page, lines, LEFT_COLUMN_X, 140.0)
+    return to_bytes(document)
