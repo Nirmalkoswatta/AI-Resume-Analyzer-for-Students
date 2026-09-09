@@ -21,10 +21,14 @@ function isErrorResponse(value: unknown): value is ErrorResponse {
   return typeof value === "object" && value !== null && "code" in value && "message" in value;
 }
 
-export async function requestAnalysis(form: FormData): Promise<AnalysisResult> {
+export async function requestAnalysis(
+  form: FormData,
+  forwardedFor: string | null,
+): Promise<AnalysisResult> {
   const response = await fetch(apiUrl("/v1/analyze"), {
     method: "POST",
     body: form,
+    headers: forwardedFor ? { "x-forwarded-for": forwardedFor } : undefined,
     cache: "no-store",
   });
 

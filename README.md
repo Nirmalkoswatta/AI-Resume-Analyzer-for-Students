@@ -80,13 +80,18 @@ off the public internet.
 header once exhausted. `/v1/health` is never limited. Set the limit to 0 to disable.
 
 **`RESUME_API_TRUSTED_PROXY_COUNT` must match your deployment or the limit is worthless.**
-It defaults to 0, meaning the socket peer is the client. Behind one proxy or load balancer,
-set it to 1; behind a CDN plus a load balancer, 2. The client is then read as the Nth entry
-from the right of `X-Forwarded-For`, which is the last hop your own infrastructure wrote.
-Anything a caller puts to the left of that is ignored, so nobody can mint a fresh identity
-per request by sending their own header. Leaving it at 0 behind a proxy is also wrong in
-the other direction: every request then looks like it came from the load balancer, and one
-user exhausts the limit for everyone.
+The browser never calls the API directly, so the Next server is always one hop: set this to
+at least 1, plus one for each CDN or load balancer in front of it.
+
+At 0 the API keys on the socket peer, which is the Next server for every request — one
+student then exhausts the limit for everyone. That is not hypothetical; it is what happens
+if you deploy this without setting the variable.
+
+The client is read as the Nth entry from the right of `X-Forwarded-For`, which is the last
+hop your own infrastructure wrote. Anything a caller puts to the left of that is ignored, so
+nobody can mint a fresh identity per request. This does mean **the API must not be publicly
+reachable** — restrict it to your frontend's egress. A caller who can reach it directly can
+forge the header, because at that point there is no trusted hop to anchor on.
 
 Counters are in memory, so each instance limits independently — two instances mean twice
 the effective limit. That is fine for a single container and wrong the moment you scale

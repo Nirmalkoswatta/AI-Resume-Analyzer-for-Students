@@ -7,9 +7,10 @@ export const dynamic = "force-dynamic";
 
 export async function POST(request: Request): Promise<NextResponse> {
   const form = await request.formData();
+  const forwardedFor = request.headers.get("x-forwarded-for");
 
   try {
-    return NextResponse.json(await requestAnalysis(form));
+    return NextResponse.json(await requestAnalysis(form, forwardedFor));
   } catch (error) {
     if (error instanceof AnalysisFailed) {
       return NextResponse.json(error.detail, { status: error.status });
