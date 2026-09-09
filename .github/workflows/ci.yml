@@ -82,6 +82,9 @@ jobs:
       - name: Types
         run: npm run typecheck --workspace @resume/web
 
+      - name: Tests
+        run: npm test --workspace @resume/web
+
       - name: Build
         run: npm run build
 

@@ -104,8 +104,19 @@ cd services/api && ./.venv/Scripts/python.exe -m ruff check . && ./.venv/Scripts
 ```
 
 ```bash
-npm run lint && npm run typecheck --workspace @resume/web && npm run build
+npm run lint && npm run typecheck --workspace @resume/web && npm test --workspace @resume/web && npm run build
 ```
+
+Frontend tests use Node's built-in runner against `.ts` files directly — Node 24 strips the
+types, so there is no test framework and no transpiler to install. `node --test` needs a
+glob, not a directory.
+
+The upload validation in `apps/web/lib/validation.ts` is deliberately a plain function with
+no React in it, so it can be tested this way. It is a convenience for the student, not a
+security boundary: the API re-checks size, MIME type, and PDF magic bytes on every request,
+because anything the browser decides can be bypassed. Its limits are duplicated in
+`lib/constants.ts` and `app/config.py`; if they drift, the student sees a slightly wrong
+message before upload and the API still rejects correctly.
 
 ## Conventions
 
