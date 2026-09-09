@@ -28,3 +28,61 @@ body {
   background-color: var(--color-surface);
   color: var(--color-ink);
 }
+
+@media print {
+  :root {
+    --color-surface: #ffffff;
+    --color-panel: #ffffff;
+    --color-border-subtle: #d4d4d8;
+    --color-ink: #18181b;
+    --color-ink-muted: #52525b;
+  }
+
+  @page {
+    margin: 14mm;
+  }
+
+  .screen-only {
+    display: none !important;
+  }
+
+  body {
+    background: #ffffff;
+  }
+
+  main {
+    max-width: none;
+    padding: 0;
+  }
+
+  section {
+    border-color: var(--color-border-subtle) !important;
+    box-shadow: none !important;
+    break-inside: avoid;
+  }
+
+  li,
+  h1,
+  h2,
+  h3 {
+    break-inside: avoid;
+  }
+
+  .grid {
+    display: block;
+  }
+
+  .grid > * {
+    margin-bottom: 1rem;
+  }
+
+  [class*="bg-critical"],
+  [class*="bg-pass"],
+  [class*="bg-high"],
+  [class*="bg-medium"],
+  [class*="bg-low"],
+  [class*="bg-accent"] {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+}

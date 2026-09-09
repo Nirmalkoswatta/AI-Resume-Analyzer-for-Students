@@ -90,18 +90,28 @@ export function Analyzer() {
   if (result) {
     return (
       <div className="space-y-6">
-        <div className="flex items-center justify-between gap-4">
+        <div className="flex flex-wrap items-center justify-between gap-4">
           <p className="text-sm text-ink-muted">
-            Analyzed {result.document.page_count} page, {result.document.word_count} words. Nothing
-            was stored.
+            Analyzed {result.document.page_count}{" "}
+            {result.document.page_count === 1 ? "page" : "pages"}, {result.document.word_count}{" "}
+            words. Nothing was stored.
           </p>
-          <button
-            type="button"
-            onClick={reset}
-            className="rounded-lg border border-border-subtle px-4 py-2 text-sm font-medium hover:bg-panel"
-          >
-            Analyze another
-          </button>
+          <div className="screen-only flex gap-2">
+            <button
+              type="button"
+              onClick={() => window.print()}
+              className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white"
+            >
+              Download as PDF
+            </button>
+            <button
+              type="button"
+              onClick={reset}
+              className="rounded-lg border border-border-subtle px-4 py-2 text-sm font-medium hover:bg-panel"
+            >
+              Analyze another
+            </button>
+          </div>
         </div>
         <Report result={result} />
       </div>

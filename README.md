@@ -203,9 +203,22 @@ deterministic and every check is shown with its reasoning.
 Detected and rejected with typed errors: scanned image resumes, encrypted PDFs, corrupt
 files, documents over the page limit, oversized uploads, and non-PDFs renamed to `.pdf`.
 
+### Downloading the report
+
+The Download button calls `window.print()` against a print stylesheet in `globals.css`.
+No PDF library, no server endpoint, no extra system libraries in the container — the
+browser's own PDF engine does it, and because it prints the same DOM the student is looking
+at, the file cannot drift from the page.
+
+Print rules force a light palette, drop the buttons via `.screen-only`, unstack the grid,
+and set `break-inside: avoid` on cards so a check never splits across pages.
+
+Swap in server-side rendering only if you later need a PDF nobody is watching a browser
+for — emailing reports, or a queue job. For a student clicking download, this is the whole
+feature.
+
 Not built yet:
 
-- **PDF report export** — render the result to a downloadable file.
 - **Rate limiting** — before this is exposed publicly.
 - **Trained models** — role classifier and skill NER, per the ceiling noted above. Strip PII
   at ingest before training on any public resume corpus; those datasets contain real
