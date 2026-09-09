@@ -70,7 +70,7 @@ def test_job_description_produces_gap_analysis(
     response = client.post(
         ENDPOINT,
         files=upload(single_column_pdf),
-        data={"job_description": "We are hiring a graduate backend engineer."},
+        data={"job_description": "Graduate backend role using Python, Docker and Kubernetes."},
     )
 
     match = response.json()["fit"]["job_description"]

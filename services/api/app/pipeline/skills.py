@@ -1,4 +1,6 @@
 import re
+from collections import Counter
+from collections.abc import Iterator
 from dataclasses import dataclass
 
 from rapidfuzz import fuzz, process
@@ -18,6 +20,7 @@ FUZZY_CONFIDENCE_CEILING = 0.8
 MIN_FUZZY_TOKEN_LENGTH = 6
 
 _TOKEN_PATTERN = re.compile(r"[A-Za-z0-9+#.]+")
+_TRAILING_DOTS = re.compile(r"\.+$")
 
 
 @dataclass(frozen=True, slots=True)
@@ -74,18 +77,15 @@ def section_texts(document: Document, sections: list[DetectedSection]) -> dict[S
 
 
 def tokenise_with_case(text: str) -> list[Token]:
-    return [
-        Token(original=match.group(), lowered=match.group().lower())
-        for match in _TOKEN_PATTERN.finditer(text)
-    ]
+    tokens = []
+    for match in _TOKEN_PATTERN.finditer(text):
+        written = _TRAILING_DOTS.sub("", match.group())
+        if written:
+            tokens.append(Token(original=written, lowered=written.lower()))
+    return tokens
 
 
-def collect_exact_matches(
-    text: str,
-    kind: SectionKind,
-    taxonomy: Taxonomy,
-    matches: dict[str, MatchAccumulator],
-) -> None:
+def iter_exact_matches(text: str, taxonomy: Taxonomy, allow_strict: bool) -> Iterator[SkillEntry]:
     tokens = tokenise_with_case(text)
     longest = taxonomy.longest_surface
     position = 0
@@ -100,21 +100,37 @@ def collect_exact_matches(
 
             if entry is None:
                 continue
-            if entry.strict and not accepts_strict_match(entry, window, kind):
+            if entry.strict and not accepts_strict_match(entry, window, allow_strict):
                 continue
 
-            record(matches, entry, kind, EXACT_CONFIDENCE, fuzzy=False)
+            yield entry
             matched_length = length
             break
 
         position += matched_length if matched_length else 1
 
 
-def accepts_strict_match(entry: SkillEntry, window: list[Token], kind: SectionKind) -> bool:
-    if kind is not SectionKind.SKILLS:
+def accepts_strict_match(entry: SkillEntry, window: list[Token], allow_strict: bool) -> bool:
+    if not allow_strict:
         return False
     written = " ".join(token.original for token in window)
     return written == entry.name or written in entry.surfaces
+
+
+def collect_exact_matches(
+    text: str,
+    kind: SectionKind,
+    taxonomy: Taxonomy,
+    matches: dict[str, MatchAccumulator],
+) -> None:
+    allow_strict = kind is SectionKind.SKILLS
+    for entry in iter_exact_matches(text, taxonomy, allow_strict):
+        record(matches, entry, kind, EXACT_CONFIDENCE, fuzzy=False)
+
+
+def count_skill_mentions(text: str) -> Counter[str]:
+    taxonomy = get_taxonomy()
+    return Counter(entry.id for entry in iter_exact_matches(text, taxonomy, allow_strict=True))
 
 
 def collect_fuzzy_matches(
@@ -187,7 +203,3 @@ def build_skill(match: MatchAccumulator) -> Skill:
         found_in=sorted(match.sections, key=lambda kind: kind.value),
         confidence=round(match.confidence, 2),
     )
-
-
-def claimed_only_skills(skills: list[Skill]) -> list[Skill]:
-    return [skill for skill in skills if skill.evidence is EvidenceStrength.CLAIMED]

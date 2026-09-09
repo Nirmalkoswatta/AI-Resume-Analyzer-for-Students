@@ -2,10 +2,10 @@ from datetime import UTC, datetime
 from uuid import uuid4
 
 from app.config import MODEL_VERSION, RUBRIC_VERSION, Settings
-from app.fixtures import fixture_role_fit
 from app.pipeline.advise import advise
 from app.pipeline.ats import evaluate
 from app.pipeline.document import Document
+from app.pipeline.fit import assess_fit
 from app.pipeline.ingest import parse_document
 from app.pipeline.segment import segment
 from app.pipeline.skills import extract_skills
@@ -30,7 +30,7 @@ def analyze_resume(
         missing_sections=missing_sections,
         skills=skills,
         ats=ats,
-        fit=fixture_role_fit(job_description),
+        fit=assess_fit(skills, job_description),
         suggestions=advise(ats, missing_sections, skills),
     )
 

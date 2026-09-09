@@ -4,8 +4,9 @@ Upload a resume PDF and get back an ATS-friendliness score with every check show
 structure audit, extracted skills, predicted role fit, a gap analysis against a target job
 posting, and a prioritised list of fixes.
 
-No LLM. Analysis is a deterministic rule pipeline plus classical ML models trained on
-public datasets, with a small pretrained sentence encoder for semantic job matching.
+No LLM. Analysis is a deterministic pipeline driven by editable config: the same PDF
+always produces the same score, and every judgement traces back to a rule you can read.
+Trained models are planned where the rules run out, not used as the starting point.
 
 ## Layout
 
@@ -107,19 +108,26 @@ Components by default.
 | `ats` | Weighted rubric from `resources/ats_rubric.yaml` | No |
 | `advise` | Failed checks and missing sections to prioritised suggestions | No |
 | `skills` | Taxonomy match over `resources/skills.yaml`, with fuzzy recovery | No |
-| `fit` | Role classifier plus job-description similarity | Planned |
+| `fit` | Role profiles from `resources/roles.yaml`, job-description gap analysis | No |
 
 `ingest` is the only module that touches PyMuPDF. Everything downstream reads the
 `Document` dataclass, so nothing else depends on the PDF library.
 
 ### Tuning without touching code
 
-Both YAML files under `app/resources/` are the knobs. `headings.yaml` holds heading
-synonyms, which sections are expected, and the advice shown when one is missing;
-`ats_rubric.yaml` holds each check's weight, severity, wording, and the fix it produces.
-Adding a heading synonym or reweighting a check is a config change and a test, not a code
-change. Bump `version` in the rubric whenever weights move, so a changed score can always
-be explained.
+Four YAML files under `app/resources/` are the knobs, and most tuning is editing them
+rather than writing code:
+
+| File | Controls |
+| --- | --- |
+| `headings.yaml` | Heading synonyms, expected sections, advice when one is missing |
+| `ats_rubric.yaml` | Each check's weight, severity, wording, and the fix it produces |
+| `skills.yaml` | The skill taxonomy: names, aliases, categories, strict matching |
+| `roles.yaml` | Role profiles as lists of skill ids |
+
+Bump `version` in the rubric whenever weights move, so a changed score can always be
+explained. Adding a heading synonym, a skill alias, or a role is a config change and a
+test, never a code change.
 
 ## Skill extraction
 
@@ -157,24 +165,48 @@ verb-stripping pass before it matches resume text well.
 After regenerating, run the API tests. `test_skills.py` asserts the taxonomy loads, ids are
 unique, and known aliases resolve, which is the guard against a bad conversion.
 
+## Role fit and job matching
+
+Both reuse the skill taxonomy rather than adding a model.
+
+**Job-description matching** runs the same matcher over the pasted posting, then diffs
+against the resume. `missing_skills` is the output that matters; `similarity` is just the
+matched fraction. Importance is how often the posting repeats a skill, so a requirement
+named three times outranks one mentioned in passing. A posting with no recognisable skills
+returns no match block rather than a fabricated score.
+
+**Role prediction** scores the extracted skills against the profiles in
+`resources/roles.yaml`. Two things stop it degenerating:
+
+- Skills are weighted by **distinctiveness** — one over the number of roles listing them —
+  so Git and Python barely move the ranking while Terraform or Figma do. Without this,
+  small generic profiles win every time.
+- Demonstrated skills count more than merely claimed ones.
+
+### The ceiling here
+
+This is a rules approach, not the trained classifier the project plans for. It is honest
+about what it knows: it can only predict roles listed in `roles.yaml`, using skills present
+in `skills.yaml`. A resume full of skills outside the taxonomy will rank poorly for reasons
+the student cannot see. It costs no dependencies, no model download, no training corpus,
+and it is fully explainable, which is why it ships first.
+
+Swap it for a trained model when the seed rules visibly mispredict on real resumes. That
+work needs a public resume corpus, which has licensing and PII questions attached — see the
+taxonomy section above for the same tradeoff.
+
 ## Current state
 
-Ingestion, segmentation, ATS scoring, skill extraction, and suggestions all run on the real
-uploaded file. Scores are deterministic and every check is shown with its reasoning.
+The whole pipeline runs on the real uploaded file. No fixtures remain. Scores are
+deterministic and every check is shown with its reasoning.
 
 Detected and rejected with typed errors: scanned image resumes, encrypted PDFs, corrupt
 files, documents over the page limit, oversized uploads, and non-PDFs renamed to `.pdf`.
 
-Still a fixture, isolated in `app/fixtures.py`: role fit and job-description matching. That
-needs the trained classifier and the sentence encoder.
+Not built yet:
 
-Next, all landing in `ml/` and loaded by the API as finished artefacts:
-
-- **Role classifier** — TF-IDF into LinearSVC over a public resume corpus. Dedupe by cosine
-  similarity before splitting; near-duplicate resumes across the split inflate accuracy badly.
-- **Skill NER** — `sklearn-crfsuite` over the public annotated resume set, to catch skills
-  absent from the taxonomy. A supplement to the gazetteer, never a replacement.
-- **Job-description matching** — `all-MiniLM-L6-v2` embeddings alongside the keyword gap.
-
-Strip PII at ingest before training on any public resume corpus. Those datasets contain
-real people's names, emails, and phone numbers, and nothing downstream needs identity.
+- **PDF report export** — render the result to a downloadable file.
+- **Rate limiting** — before this is exposed publicly.
+- **Trained models** — role classifier and skill NER, per the ceiling noted above. Strip PII
+  at ingest before training on any public resume corpus; those datasets contain real
+  people's names, emails, and phone numbers, and nothing downstream needs identity.
