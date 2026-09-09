@@ -84,3 +84,21 @@ def test_lexicon_normalisation_is_punctuation_insensitive() -> None:
     assert lexicon.kind_for("WORK HISTORY") is SectionKind.EXPERIENCE
     assert lexicon.kind_for("Technical Skills") is SectionKind.SKILLS
     assert lexicon.kind_for("Nonsense Heading") is None
+
+
+def test_repeated_headings_across_pages_are_merged(two_page_pdf: bytes, settings: Settings) -> None:
+    kinds = kinds_of(two_page_pdf, settings)
+
+    assert len(kinds) == len(set(kinds))
+    assert SectionKind.EDUCATION in kinds
+
+
+def test_merged_section_keeps_the_combined_word_count(
+    two_page_pdf: bytes, single_column_pdf: bytes, settings: Settings
+) -> None:
+    def skills_words(payload: bytes) -> int:
+        document = parse_document(payload, settings)
+        sections, _ = segment(document)
+        return next(s for s in sections if s.kind is SectionKind.SKILLS).word_count
+
+    assert skills_words(two_page_pdf) > skills_words(single_column_pdf)

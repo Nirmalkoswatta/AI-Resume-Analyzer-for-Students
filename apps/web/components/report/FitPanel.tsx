@@ -37,7 +37,8 @@ export function FitPanel({ fit }: { fit: RoleFit }) {
         <div className="mt-6 border-t border-border-subtle pt-5">
           <p className="text-sm font-medium">Against your target job</p>
           <p className="mt-1 text-sm text-ink-muted">
-            {match.matched_skills.length} required skills already covered.
+            You already cover {match.matched_skills.length} of the skills this posting names,{" "}
+            {percent(match.similarity)} of them.
           </p>
 
           {match.missing_skills.length > 0 ? (

@@ -97,3 +97,29 @@ def test_pdf_without_pages_is_rejected(settings: Settings) -> None:
 )
 def test_font_names_are_normalised(raw: str, expected: str) -> None:
     assert normalise_font_name(raw) == expected
+
+
+def test_multi_page_resume_is_read_whole(two_page_pdf: bytes, settings: Settings) -> None:
+    document = parse_document(two_page_pdf, settings)
+
+    assert document.page_count == 2
+    assert document.word_count == sum(
+        line.word_count for page in document.pages for line in page.lines
+    )
+    assert {page.number for page in document.pages} == {1, 2}
+
+
+def test_line_indexes_continue_across_pages(two_page_pdf: bytes, settings: Settings) -> None:
+    document = parse_document(two_page_pdf, settings)
+    indexes = [line.index for line in document.lines]
+    pages = [line.page_number for line in document.lines]
+
+    assert indexes == sorted(indexes)
+    assert len(indexes) == len(set(indexes))
+    assert pages == sorted(pages)
+
+
+def test_every_line_is_reachable_by_index(two_page_pdf: bytes, settings: Settings) -> None:
+    document = parse_document(two_page_pdf, settings)
+
+    assert all(document.line_at(line.index) is line for line in document.lines)

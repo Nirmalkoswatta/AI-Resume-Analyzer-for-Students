@@ -100,3 +100,7 @@ def test_suggestions_are_ordered_by_severity(two_column_pdf: bytes, settings: Se
     ranks = [order[suggestion.severity] for suggestion in suggestions]
 
     assert ranks == sorted(ranks)
+
+
+def test_multi_page_resume_fails_the_length_check(two_page_pdf: bytes, settings: Settings) -> None:
+    assert "appropriate_length" in failed_ids(score_of(two_page_pdf, settings))

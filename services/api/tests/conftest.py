@@ -66,6 +66,11 @@ def encrypted_pdf() -> bytes:
 
 
 @pytest.fixture
+def two_page_pdf() -> bytes:
+    return pdf_builder.multi_page_resume(2)
+
+
+@pytest.fixture
 def twelve_page_pdf() -> bytes:
     return pdf_builder.multi_page_resume(12)
 
