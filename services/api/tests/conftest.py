@@ -6,9 +6,17 @@ from fastapi.testclient import TestClient
 
 from app.config import Settings, get_settings
 from app.main import create_app
+from app.routers.analyze import get_limiter
 from tests import pdf_builder
 
 FIXTURES = Path(__file__).parent / "fixtures"
+
+
+@pytest.fixture(autouse=True)
+def reset_rate_limiter() -> Iterator[None]:
+    get_limiter.cache_clear()
+    yield
+    get_limiter.cache_clear()
 
 
 @pytest.fixture

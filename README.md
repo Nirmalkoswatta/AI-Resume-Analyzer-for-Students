@@ -73,6 +73,25 @@ The frontend reads `RESUME_API_URL` server-side only. The browser never calls th
 directly; requests go through `apps/web/app/api/analyze/route.ts`, which keeps the service
 off the public internet.
 
+### Rate limiting
+
+`/v1/analyze` allows `RESUME_API_RATE_LIMIT_REQUESTS` (default 10) per client per
+`RESUME_API_RATE_LIMIT_WINDOW_SECONDS` (default 3600), and answers 429 with a `Retry-After`
+header once exhausted. `/v1/health` is never limited. Set the limit to 0 to disable.
+
+**`RESUME_API_TRUSTED_PROXY_COUNT` must match your deployment or the limit is worthless.**
+It defaults to 0, meaning the socket peer is the client. Behind one proxy or load balancer,
+set it to 1; behind a CDN plus a load balancer, 2. The client is then read as the Nth entry
+from the right of `X-Forwarded-For`, which is the last hop your own infrastructure wrote.
+Anything a caller puts to the left of that is ignored, so nobody can mint a fresh identity
+per request by sending their own header. Leaving it at 0 behind a proxy is also wrong in
+the other direction: every request then looks like it came from the load balancer, and one
+user exhausts the limit for everyone.
+
+Counters are in memory, so each instance limits independently — two instances mean twice
+the effective limit. That is fine for a single container and wrong the moment you scale
+out; move the counter to Redis at that point.
+
 ## Checks
 
 ```bash
@@ -219,7 +238,6 @@ feature.
 
 Not built yet:
 
-- **Rate limiting** — before this is exposed publicly.
 - **Trained models** — role classifier and skill NER, per the ceiling noted above. Strip PII
   at ingest before training on any public resume corpus; those datasets contain real
   people's names, emails, and phone numbers, and nothing downstream needs identity.

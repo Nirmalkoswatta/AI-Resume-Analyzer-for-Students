@@ -1,14 +1,35 @@
+from functools import lru_cache
+from math import ceil
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, File, Form, UploadFile
+from fastapi import APIRouter, Depends, File, Form, Request, UploadFile
 
 from app.config import Settings, get_settings
+from app.errors import RateLimitedError
 from app.pipeline.analysis import analyze_resume
+from app.ratelimit import SlidingWindowLimiter, build_limiter, client_key, monotonic_now
 from app.schemas.analysis import AnalysisResult
 from app.schemas.errors import ErrorResponse
 from app.upload import read_validated_upload
 
 router = APIRouter(tags=["analysis"])
+
+
+@lru_cache(maxsize=1)
+def get_limiter() -> SlidingWindowLimiter:
+    return build_limiter(get_settings())
+
+
+def enforce_rate_limit(request: Request) -> None:
+    settings = get_settings()
+    if settings.rate_limit_requests <= 0:
+        return
+
+    key = client_key(request, settings.trusted_proxy_count)
+    retry_after = get_limiter().check(key, monotonic_now())
+    if retry_after is not None:
+        raise RateLimitedError(ceil(retry_after))
+
 
 MAX_JOB_DESCRIPTION_CHARS = 20_000
 
@@ -20,7 +41,12 @@ ANALYZE_RESPONSES: dict[int | str, dict[str, object]] = {
 }
 
 
-@router.post("/analyze", response_model=AnalysisResult, responses=ANALYZE_RESPONSES)
+@router.post(
+    "/analyze",
+    response_model=AnalysisResult,
+    responses=ANALYZE_RESPONSES,
+    dependencies=[Depends(enforce_rate_limit)],
+)
 async def analyze(
     settings: Annotated[Settings, Depends(get_settings)],
     resume: Annotated[UploadFile, File(description="Resume as a PDF, 5 MB maximum.")],

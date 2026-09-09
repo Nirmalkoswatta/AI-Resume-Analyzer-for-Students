@@ -9,6 +9,7 @@ class AnalysisError(Exception):
 
     def __init__(self, message: str | None = None, remediation: str | None = None) -> None:
         super().__init__(message or self.message)
+        self.headers: dict[str, str] = {}
         if message is not None:
             self.message = message
         if remediation is not None:
@@ -65,3 +66,14 @@ class EmptyDocumentError(AnalysisError):
     status_code = 422
     message = "No text could be extracted from this document."
     remediation = "Check that you uploaded the correct file."
+
+
+class RateLimitedError(AnalysisError):
+    code = AnalysisErrorCode.RATE_LIMITED
+    status_code = 429
+    message = "You have run several analyses recently."
+    remediation = "Wait a little while before uploading another resume."
+
+    def __init__(self, retry_after_seconds: int) -> None:
+        super().__init__()
+        self.headers = {"Retry-After": str(max(1, retry_after_seconds))}

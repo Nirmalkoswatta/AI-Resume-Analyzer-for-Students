@@ -13,6 +13,9 @@ class Settings(BaseSettings):
     max_upload_bytes: int = 5 * 1024 * 1024
     max_page_count: int = 10
     min_characters_per_page: int = 120
+    rate_limit_requests: int = 10
+    rate_limit_window_seconds: int = 3600
+    trusted_proxy_count: int = 0
     log_level: str = "info"
 
 

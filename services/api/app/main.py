@@ -35,7 +35,11 @@ def create_app() -> FastAPI:
             message=error.message,
             remediation=error.remediation,
         )
-        return JSONResponse(status_code=error.status_code, content=body.model_dump())
+        return JSONResponse(
+            status_code=error.status_code,
+            content=body.model_dump(),
+            headers=error.headers or None,
+        )
 
     return app
 
