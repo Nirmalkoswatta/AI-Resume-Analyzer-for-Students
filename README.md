@@ -148,6 +148,25 @@ Components by default.
 `ingest` is the only module that touches PyMuPDF. Everything downstream reads the
 `Document` dataclass, so nothing else depends on the PDF library.
 
+### Cost
+
+Ingestion is the whole cost of an analysis; every stage after it runs in single-digit
+milliseconds. Within ingestion, PyMuPDF's `find_tables()` is about 90% of the time, because
+it walks every character on the page. A ten-page resume parses in roughly 100 ms, which is
+fine.
+
+It stops being fine on documents built to be expensive. A PDF with thousands of tiny text
+fragments per page makes `find_tables()` grow faster than linearly: 16,000 fragments took
+4.5 seconds, and the page limit alone does not bound that, because the limit counts pages
+rather than fragments. `count_tables` therefore skips detection above
+`MAX_LINES_FOR_TABLE_DETECTION` lines on a page, which brought that case to 440 ms. No real
+resume comes near 300 lines on a page — a dense one runs about 50 — so the check still runs
+for every genuine document, and a document that trips the guard is reported as having no
+tables.
+
+Treat these numbers as orders of magnitude, not benchmarks. Repeated runs on a normal
+laptop varied threefold.
+
 ### Tuning without touching code
 
 Four YAML files under `app/resources/` are the knobs, and most tuning is editing them

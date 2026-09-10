@@ -16,6 +16,8 @@ from app.pipeline.layout import count_columns, is_in_header_or_footer
 FLAG_ITALIC = 1 << 1
 FLAG_BOLD = 1 << 4
 
+MAX_LINES_FOR_TABLE_DETECTION = 300
+
 pymupdf.no_recommend_layout()
 
 
@@ -76,7 +78,7 @@ def build_pages(pdf: pymupdf.Document) -> tuple[Page, ...]:
                 height=source.rect.height,
                 lines=tuple(lines),
                 image_count=len(source.get_images(full=True)),
-                table_count=count_tables(source),
+                table_count=count_tables(source, len(lines)),
                 character_count=len(source.get_text().strip()),
             )
         )
@@ -129,7 +131,10 @@ def build_span(raw_span: dict[str, Any]) -> Span:
     )
 
 
-def count_tables(source: pymupdf.Page) -> int:
+def count_tables(source: pymupdf.Page, line_count: int) -> int:
+    if line_count > MAX_LINES_FOR_TABLE_DETECTION:
+        return 0
+
     try:
         return len(source.find_tables().tables)
     except Exception:

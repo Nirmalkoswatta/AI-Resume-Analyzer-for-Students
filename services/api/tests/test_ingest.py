@@ -1,3 +1,5 @@
+from types import SimpleNamespace
+
 import pytest
 
 from app.config import Settings
@@ -8,7 +10,12 @@ from app.errors import (
     NotMachineReadableError,
     TooManyPagesError,
 )
-from app.pipeline.ingest import normalise_font_name, parse_document
+from app.pipeline.ingest import (
+    MAX_LINES_FOR_TABLE_DETECTION,
+    count_tables,
+    normalise_font_name,
+    parse_document,
+)
 
 
 def test_extracts_text_and_geometry(sample_resume: bytes, settings: Settings) -> None:
@@ -123,3 +130,35 @@ def test_every_line_is_reachable_by_index(two_page_pdf: bytes, settings: Setting
     document = parse_document(two_page_pdf, settings)
 
     assert all(document.line_at(line.index) is line for line in document.lines)
+
+
+class RecordingPage:
+    def __init__(self, table_count: int) -> None:
+        self.calls = 0
+        self.table_count = table_count
+
+    def find_tables(self) -> SimpleNamespace:
+        self.calls += 1
+        return SimpleNamespace(tables=list(range(self.table_count)))
+
+
+def test_tables_are_detected_on_a_normal_page() -> None:
+    page = RecordingPage(table_count=2)
+
+    assert count_tables(page, line_count=50) == 2
+    assert page.calls == 1
+
+
+def test_table_detection_is_skipped_on_pathological_pages() -> None:
+    page = RecordingPage(table_count=2)
+
+    assert count_tables(page, line_count=MAX_LINES_FOR_TABLE_DETECTION + 1) == 0
+    assert page.calls == 0
+
+
+def test_table_detection_failures_are_swallowed() -> None:
+    class ExplodingPage:
+        def find_tables(self) -> SimpleNamespace:
+            raise RuntimeError("mupdf blew up")
+
+    assert count_tables(ExplodingPage(), line_count=10) == 0
