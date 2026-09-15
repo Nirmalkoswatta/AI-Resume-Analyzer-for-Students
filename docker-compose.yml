@@ -8,6 +8,7 @@ services:
     environment:
       RESUME_API_ALLOWED_ORIGINS: '["http://localhost:3000"]'
       RESUME_API_LOG_LEVEL: info
+      RESUME_API_TRUSTED_PROXY_COUNT: "1"
 
   web:
     build:

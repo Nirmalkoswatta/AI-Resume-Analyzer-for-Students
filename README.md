@@ -26,6 +26,11 @@ Both services, containerised:
 docker compose up --build
 ```
 
+The API image is 356 MB, the web image 316 MB; both run as a non-root user, and the web
+container waits on the API's health check before starting. Compose sets
+`RESUME_API_TRUSTED_PROXY_COUNT=1` because the Next container is always one hop in front of
+the API — without it every student shares a single rate-limit bucket.
+
 Or run them directly. API first:
 
 ```bash
