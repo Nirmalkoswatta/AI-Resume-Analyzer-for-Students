@@ -1,3 +1,5 @@
+from dataclasses import replace
+from statistics import median
 from typing import Any
 
 import pymupdf
@@ -11,12 +13,13 @@ from app.errors import (
     TooManyPagesError,
 )
 from app.pipeline.document import Document, Line, Page, Span
-from app.pipeline.layout import count_columns, is_in_header_or_footer
+from app.pipeline.layout import count_columns, has_running_header_or_footer
 
 FLAG_ITALIC = 1 << 1
 FLAG_BOLD = 1 << 4
 
 MAX_LINES_FOR_TABLE_DETECTION = 300
+ROW_TOLERANCE_RATIO = 0.6
 
 pymupdf.no_recommend_layout()
 
@@ -36,12 +39,7 @@ def parse_document(payload: bytes, settings: Settings) -> Document:
         pages=pages,
         font_families=collect_font_families(pages),
         column_count=max(count_columns(page.lines, page.width, page.height) for page in pages),
-        has_text_in_header_footer=any(
-            is_in_header_or_footer(line, page.height)
-            for page in pages
-            for line in page.lines
-            if line.text
-        ),
+        has_text_in_header_footer=has_running_header_or_footer(pages),
     )
 
 
@@ -63,12 +61,16 @@ def build_pages(pdf: pymupdf.Document) -> tuple[Page, ...]:
     line_index = 0
 
     for page_number, source in enumerate(pdf, start=1):
-        lines: list[Line] = []
+        placed: list[Line] = []
         for raw_line in iter_raw_lines(source):
-            line = build_line(raw_line, line_index, page_number)
+            line = build_line(raw_line, page_number)
             if line is None:
                 continue
-            lines.append(line)
+            placed.append(line)
+
+        lines: list[Line] = []
+        for line in sort_into_reading_order(placed):
+            lines.append(replace(line, index=line_index))
             line_index += 1
 
         pages.append(
@@ -96,14 +98,37 @@ def iter_raw_lines(source: pymupdf.Page) -> list[dict[str, Any]]:
     ]
 
 
-def build_line(raw_line: dict[str, Any], index: int, page_number: int) -> Line | None:
+def sort_into_reading_order(lines: list[Line]) -> list[Line]:
+    if not lines:
+        return []
+
+    tolerance = row_tolerance(lines)
+    rows: list[list[Line]] = []
+
+    for line in sorted(lines, key=lambda item: (item.top, item.x0)):
+        if rows and line.top - rows[-1][0].top <= tolerance:
+            rows[-1].append(line)
+        else:
+            rows.append([line])
+
+    return [line for row in rows for line in sorted(row, key=lambda item: item.x0)]
+
+
+def row_tolerance(lines: list[Line]) -> float:
+    heights = [line.bottom - line.top for line in lines if line.bottom > line.top]
+    if not heights:
+        return 0.0
+    return median(heights) * ROW_TOLERANCE_RATIO
+
+
+def build_line(raw_line: dict[str, Any], page_number: int) -> Line | None:
     spans = tuple(build_span(raw_span) for raw_span in raw_line.get("spans", []))
     if not spans or not "".join(span.text for span in spans).strip():
         return None
 
     x0, top, x1, bottom = raw_line["bbox"]
     return Line(
-        index=index,
+        index=0,
         page_number=page_number,
         spans=spans,
         x0=float(x0),

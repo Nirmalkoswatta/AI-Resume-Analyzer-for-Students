@@ -52,8 +52,14 @@ def test_detects_two_columns(two_column_pdf: bytes, settings: Settings) -> None:
     assert parse_document(two_column_pdf, settings).column_count == 2
 
 
-def test_detects_text_in_header(header_footer_pdf: bytes, settings: Settings) -> None:
+def test_detects_a_header_repeated_across_pages(
+    header_footer_pdf: bytes, settings: Settings
+) -> None:
     assert parse_document(header_footer_pdf, settings).has_text_in_header_footer is True
+
+
+def test_single_page_never_has_running_furniture(edge_text_pdf: bytes, settings: Settings) -> None:
+    assert parse_document(edge_text_pdf, settings).has_text_in_header_footer is False
 
 
 def test_body_only_resume_has_no_header_text(single_column_pdf: bytes, settings: Settings) -> None:
@@ -162,3 +168,13 @@ def test_table_detection_failures_are_swallowed() -> None:
             raise RuntimeError("mupdf blew up")
 
     assert count_tables(ExplodingPage(), line_count=10) == 0
+
+
+def test_lines_are_ordered_visually_not_by_block_order(
+    scrambled_order_pdf: bytes, settings: Settings
+) -> None:
+    document = parse_document(scrambled_order_pdf, settings)
+    tops = [line.top for line in document.lines]
+
+    assert tops == sorted(tops)
+    assert document.lines[0].text == "Priya Fernando"

@@ -51,6 +51,11 @@ def header_footer_pdf() -> bytes:
 
 
 @pytest.fixture
+def edge_text_pdf() -> bytes:
+    return pdf_builder.single_page_with_edge_text()
+
+
+@pytest.fixture
 def creative_headings_pdf() -> bytes:
     return pdf_builder.resume_with_creative_headings()
 
@@ -83,3 +88,8 @@ def ambiguous_skills_pdf() -> bytes:
 @pytest.fixture
 def misspelled_skills_pdf() -> bytes:
     return pdf_builder.resume_with_misspelled_skills()
+
+
+@pytest.fixture
+def scrambled_order_pdf() -> bytes:
+    return pdf_builder.scrambled_block_order_resume()

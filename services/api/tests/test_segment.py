@@ -102,3 +102,23 @@ def test_merged_section_keeps_the_combined_word_count(
         return next(s for s in sections if s.kind is SectionKind.SKILLS).word_count
 
     assert skills_words(two_page_pdf) > skills_words(single_column_pdf)
+
+
+def test_sections_follow_visual_order_when_blocks_are_scrambled(
+    scrambled_order_pdf: bytes, settings: Settings
+) -> None:
+    assert kinds_of(scrambled_order_pdf, settings) == [
+        SectionKind.CONTACT,
+        SectionKind.EXPERIENCE,
+        SectionKind.EDUCATION,
+        SectionKind.SKILLS,
+    ]
+
+
+def test_a_heading_never_loses_its_body_to_block_order(
+    scrambled_order_pdf: bytes, settings: Settings
+) -> None:
+    document = parse_document(scrambled_order_pdf, settings)
+    sections, _ = segment(document)
+
+    assert all(section.word_count > 0 for section in sections)

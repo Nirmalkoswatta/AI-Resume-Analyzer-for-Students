@@ -88,13 +88,28 @@ def two_column_resume() -> bytes:
 
 def resume_with_header_footer_text() -> bytes:
     document = new_document()
+    for number in (1, 2):
+        page = document.new_page(width=PAGE_WIDTH, height=PAGE_HEIGHT)
+        page.insert_text(
+            (LEFT_COLUMN_X, 30.0),
+            "priya.f@example.com | +94 77 123 4567",
+            fontsize=BODY_FONT_SIZE,
+            fontname="helv",
+        )
+        page.insert_text(
+            (LEFT_COLUMN_X, PAGE_HEIGHT - 20.0),
+            f"Page {number} of 2",
+            fontsize=BODY_FONT_SIZE,
+            fontname="helv",
+        )
+        write_lines(page, SINGLE_COLUMN_BODY, LEFT_COLUMN_X, 140.0)
+    return to_bytes(document)
+
+
+def single_page_with_edge_text() -> bytes:
+    document = new_document()
     page = document.new_page(width=PAGE_WIDTH, height=PAGE_HEIGHT)
-    page.insert_text(
-        (LEFT_COLUMN_X, 30.0),
-        "priya.f@example.com | +94 77 123 4567",
-        fontsize=BODY_FONT_SIZE,
-        fontname="helv",
-    )
+    page.insert_text((LEFT_COLUMN_X, 30.0), "Priya Fernando", fontsize=16.0, fontname="helv")
     write_lines(page, SINGLE_COLUMN_BODY, LEFT_COLUMN_X, 140.0)
     return to_bytes(document)
 
@@ -171,4 +186,34 @@ def resume_with_misspelled_skills() -> bytes:
         ("Javascripts, Kubernets", BODY_FONT_SIZE),
     ]
     write_lines(page, lines, LEFT_COLUMN_X, 140.0)
+    return to_bytes(document)
+
+
+def scrambled_block_order_resume() -> bytes:
+    document = new_document()
+    page = document.new_page(width=PAGE_WIDTH, height=PAGE_HEIGHT)
+
+    blocks = [
+        (620.0, [("SKILLS", HEADING_FONT_SIZE), ("Python, React, SQL, Git", BODY_FONT_SIZE)]),
+        (
+            420.0,
+            [
+                ("EDUCATION", HEADING_FONT_SIZE),
+                ("BSc Computer Science, University of Colombo", BODY_FONT_SIZE),
+            ],
+        ),
+        (
+            220.0,
+            [
+                ("WORK EXPERIENCE", HEADING_FONT_SIZE),
+                ("Software Engineering Intern, Reddy Labs", BODY_FONT_SIZE),
+                ("Built REST endpoints in Python and Flask", BODY_FONT_SIZE),
+            ],
+        ),
+        (120.0, [("Priya Fernando", 16.0), ("priya.f@example.com", BODY_FONT_SIZE)]),
+    ]
+
+    for start_y, lines in blocks:
+        write_lines(page, lines, LEFT_COLUMN_X, start_y)
+
     return to_bytes(document)

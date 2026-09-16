@@ -7,7 +7,8 @@ from app.schemas.enums import SectionKind
 
 MAX_HEADING_WORDS = 6
 LARGE_FONT_RATIO = 1.15
-MIN_TYPOGRAPHIC_SIGNALS = 2
+TITLE_FONT_RATIO = 2.0
+MIN_TYPOGRAPHIC_SIGNALS = 1
 EXCERPT_MAX_CHARS = 200
 
 
@@ -47,13 +48,19 @@ def find_headings(document: Document) -> list[Heading]:
 def looks_like_heading(line: Line, median_font_size: float) -> bool:
     if line.text.endswith((".", ",", ";", ":")):
         return False
+    if not line.is_upper_case:
+        return False
+    if is_document_title(line, median_font_size):
+        return False
 
-    signals = (
-        line.is_bold,
-        line.is_upper_case,
-        is_larger_than_body(line, median_font_size),
-    )
+    signals = (line.is_bold, is_larger_than_body(line, median_font_size))
     return sum(signals) >= MIN_TYPOGRAPHIC_SIGNALS
+
+
+def is_document_title(line: Line, median_font_size: float) -> bool:
+    if median_font_size <= 0:
+        return False
+    return line.max_font_size >= median_font_size * TITLE_FONT_RATIO
 
 
 def is_larger_than_body(line: Line, median_font_size: float) -> bool:
@@ -67,15 +74,17 @@ def build_sections(document: Document, headings: list[Heading]) -> list[Detected
     if not lines:
         return []
 
+    body_headings = drop_headings_above_contact_block(headings)
+
     sections: list[DetectedSection] = []
-    boundaries = [heading.line.index for heading in headings]
+    boundaries = [heading.line.index for heading in body_headings]
 
     contact_end = boundaries[0] if boundaries else lines[-1].index + 1
     contact_lines = [line for line in lines if line.index < contact_end]
     if contact_lines:
         sections.append(build_section(SectionKind.CONTACT, None, contact_lines))
 
-    for position, heading in enumerate(headings):
+    for position, heading in enumerate(body_headings):
         next_boundary = (
             boundaries[position + 1] if position + 1 < len(boundaries) else lines[-1].index + 1
         )
@@ -83,6 +92,16 @@ def build_sections(document: Document, headings: list[Heading]) -> list[Detected
         sections.append(build_section(heading.kind, heading.line.text, body))
 
     return merge_repeated_kinds(sections)
+
+
+def drop_headings_above_contact_block(headings: list[Heading]) -> list[Heading]:
+    first_recognised = next(
+        (heading for heading in headings if heading.kind is not SectionKind.OTHER), None
+    )
+    if first_recognised is None:
+        return headings
+
+    return [heading for heading in headings if heading.line.index >= first_recognised.line.index]
 
 
 def build_section(kind: SectionKind, heading: str | None, body: list[Line]) -> DetectedSection:

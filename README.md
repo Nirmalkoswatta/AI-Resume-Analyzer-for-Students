@@ -153,6 +153,20 @@ Components by default.
 `ingest` is the only module that touches PyMuPDF. Everything downstream reads the
 `Document` dataclass, so nothing else depends on the PDF library.
 
+### Reading order is not block order
+
+Design tools emit text blocks in whatever order they were drawn, which has nothing to do
+with where they sit on the page. A Canva CV puts the name at block 8 and a section heading
+after its own body. Every stage downstream assumes reading order, so `ingest` sorts lines
+into visual rows — group by vertical position within a tolerance of the median line height,
+then left to right within each row — before assigning indices. Without this, headings lose
+their bodies and sections come out scrambled.
+
+A header or footer means *repeated page furniture*, not merely text near a page edge. It is
+detected by the same text appearing in the band on two or more pages, with digits stripped
+so "Page 1 of 3" matches "Page 2 of 3". A single-page resume can never have one. Judging it
+by position alone flagged a name at the top of page one, which is where names belong.
+
 ### Cost
 
 Ingestion is the whole cost of an analysis; every stage after it runs in single-digit

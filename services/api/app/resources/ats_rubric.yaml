@@ -42,14 +42,14 @@ checks:
     label: No content in headers or footers
     weight: 0.15
     severity: high
-    passed: All content sits in the body of the page where parsers look.
+    passed: No repeating header or footer furniture that a parser would skip.
     failed: >-
-      Some text sits in the page header or footer, where most parsers never look. Contact
-      details placed there are commonly lost.
-    fix_title: Move content out of the page header and footer
+      The same text repeats in the page header or footer across pages, where most parsers
+      never look. Contact details placed there are commonly lost.
+    fix_title: Move repeated content out of the page header and footer
     fix_detail: >-
-      Put your name, email and phone number in the body of the first page. Anything left in a
-      header or footer may never reach the recruiter.
+      Put your name, email and phone number in the body of the first page. Anything sitting in
+      a repeated header or footer may never reach the recruiter.
 
   recognisable_section_headings:
     label: Recognisable section headings

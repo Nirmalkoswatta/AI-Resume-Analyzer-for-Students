@@ -1,6 +1,8 @@
+import re
+from collections import Counter
 from dataclasses import dataclass
 
-from app.pipeline.document import Line
+from app.pipeline.document import Line, Page
 
 HEADER_BAND_RATIO = 0.07
 FOOTER_BAND_RATIO = 0.07
@@ -9,6 +11,10 @@ MIN_GUTTER_RATIO = 0.05
 GUTTER_SEARCH_MARGIN_RATIO = 0.2
 MIN_LINES_FOR_COLUMN_DETECTION = 8
 MIN_VERTICAL_OVERLAP_RATIO = 0.4
+MIN_PAGES_FOR_RUNNING_FURNITURE = 2
+MIN_REPEATS_FOR_RUNNING_FURNITURE = 2
+
+_DIGITS = re.compile(r"\d+")
 
 
 @dataclass(frozen=True, slots=True)
@@ -128,3 +134,24 @@ def vertically_overlapping(left: list[Line], right: list[Line]) -> bool:
         return False
 
     return overlap / shorter >= MIN_VERTICAL_OVERLAP_RATIO
+
+
+def has_running_header_or_footer(pages: tuple[Page, ...]) -> bool:
+    if len(pages) < MIN_PAGES_FOR_RUNNING_FURNITURE:
+        return False
+
+    repeats: Counter[str] = Counter()
+    for page in pages:
+        repeats.update(
+            {
+                furniture_key(line.text)
+                for line in page.lines
+                if line.text and is_in_header_or_footer(line, page.height)
+            }
+        )
+
+    return any(count >= MIN_REPEATS_FOR_RUNNING_FURNITURE for count in repeats.values())
+
+
+def furniture_key(text: str) -> str:
+    return _DIGITS.sub("", text).strip().lower()

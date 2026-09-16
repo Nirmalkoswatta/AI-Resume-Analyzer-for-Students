@@ -80,8 +80,10 @@ aliases:
   contact:
     - contact
     - contact details
+    - contact info
     - contact information
     - personal details
+    - details
 
 missing_section_advice:
   summary:
