@@ -1,3 +1,5 @@
+import logging
+import time
 from functools import lru_cache
 from math import ceil
 from typing import Annotated
@@ -6,6 +8,7 @@ from fastapi import APIRouter, Depends, File, Form, Request, UploadFile
 
 from app.config import Settings, get_settings
 from app.errors import RateLimitedError
+from app.observability import describe_analysis
 from app.pipeline.analysis import analyze_resume
 from app.ratelimit import SlidingWindowLimiter, build_limiter, client_key, monotonic_now
 from app.schemas.analysis import AnalysisResult
@@ -13,6 +16,7 @@ from app.schemas.errors import ErrorResponse
 from app.upload import read_validated_upload
 
 router = APIRouter(tags=["analysis"])
+logger = logging.getLogger("resume.analysis")
 
 
 @lru_cache(maxsize=1)
@@ -59,4 +63,19 @@ async def analyze(
     ] = None,
 ) -> AnalysisResult:
     payload = await read_validated_upload(resume, settings)
-    return analyze_resume(payload, job_description, settings)
+
+    started = time.perf_counter()
+    result = analyze_resume(payload, job_description, settings)
+    duration_ms = round((time.perf_counter() - started) * 1000, 1)
+
+    logger.info(
+        "analysis.completed",
+        extra={
+            "upload_bytes": len(payload),
+            "with_job_description": job_description is not None,
+            "duration_ms": duration_ms,
+            **describe_analysis(result),
+        },
+    )
+
+    return result

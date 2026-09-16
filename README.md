@@ -112,16 +112,34 @@ cd services/api && ./.venv/Scripts/python.exe -m ruff check . && ./.venv/Scripts
 npm run lint && npm run typecheck --workspace @resume/web && npm test --workspace @resume/web && npm run build
 ```
 
-Frontend tests use Node's built-in runner against `.ts` files directly — Node 24 strips the
-types, so there is no test framework and no transpiler to install. `node --test` needs a
-glob, not a directory.
+Frontend tests run on Vitest with Testing Library and jsdom, covering the upload form's
+state transitions, error and network-failure handling, and every report panel including its
+empty states.
+
+Pin `vite` to 6 and `@vitejs/plugin-react` to 4. Newer versions pull `vite@8`, which uses
+rolldown, whose native binding does not install reliably in an npm workspace.
 
 The upload validation in `apps/web/lib/validation.ts` is deliberately a plain function with
-no React in it, so it can be tested this way. It is a convenience for the student, not a
-security boundary: the API re-checks size, MIME type, and PDF magic bytes on every request,
-because anything the browser decides can be bypassed. Its limits are duplicated in
-`lib/constants.ts` and `app/config.py`; if they drift, the student sees a slightly wrong
-message before upload and the API still rejects correctly.
+no React in it. It is a convenience for the student, not a security boundary: the API
+re-checks size, MIME type, and PDF magic bytes on every request, because anything the
+browser decides can be bypassed. Its limits are duplicated in `lib/constants.ts` and
+`app/config.py`; if they drift, the student sees a slightly wrong message before upload and
+the API still rejects correctly.
+
+## Logging
+
+The API logs one JSON line per request and one per analysis, to stdout. Every line carries a
+`request_id`, taken from an inbound `X-Request-Id` when present (sanitised and truncated) and
+generated otherwise, and echoed back on the response so a student's report can be traced.
+
+**Logs describe shape, never content.** Page and word counts, column count, section *kinds*,
+failed check ids, scores, durations. No resume text, no names, no filenames — not even
+heading text, because on a real CV a heading turns out to be the candidate's name. A test
+asserts that no extracted skill or fixture name appears in a log payload.
+
+That is enough to diagnose a bad parse without holding anyone's personal data: a resume that
+returns nothing useful shows up as `columns: 2`, `skills_found: 0`,
+`unrecognised_headings: 2`.
 
 ## Conventions
 

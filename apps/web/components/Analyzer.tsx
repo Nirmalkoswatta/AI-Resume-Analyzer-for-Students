@@ -66,6 +66,9 @@ export function Analyzer() {
   if (result) {
     return (
       <div className="space-y-6">
+        <p role="status" className="sr-only">
+          Analysis complete.
+        </p>
         <div className="flex flex-wrap items-center justify-between gap-4">
           <p className="text-sm text-ink-muted">
             Analyzed {result.document.page_count}{" "}
@@ -95,7 +98,10 @@ export function Analyzer() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5">
+    <form onSubmit={handleSubmit} className="space-y-5" aria-busy={status === "analyzing"}>
+      <p role="status" className="sr-only">
+        {status === "analyzing" ? "Analyzing your resume." : ""}
+      </p>
       <div>
         <label htmlFor="resume" className="mb-2 block text-sm font-medium">
           Resume PDF
@@ -105,10 +111,11 @@ export function Analyzer() {
           name="resume"
           type="file"
           accept="application/pdf"
+          aria-describedby="resume-constraints"
           onChange={(event) => setFile(event.target.files?.[0] ?? null)}
           className="block w-full cursor-pointer rounded-lg border border-dashed border-border-subtle bg-panel p-6 text-sm file:mr-4 file:rounded-md file:border-0 file:bg-accent file:px-4 file:py-2 file:text-sm file:font-medium file:text-white"
         />
-        <p className="mt-2 text-xs text-ink-muted">
+        <p id="resume-constraints" className="mt-2 text-xs text-ink-muted">
           PDF only, up to 5 MB. Your resume is analyzed in memory and never saved.
         </p>
       </div>

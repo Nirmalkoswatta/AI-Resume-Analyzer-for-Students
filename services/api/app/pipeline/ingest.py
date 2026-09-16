@@ -13,7 +13,11 @@ from app.errors import (
     TooManyPagesError,
 )
 from app.pipeline.document import Document, Line, Page, Span
-from app.pipeline.layout import count_columns, has_running_header_or_footer
+from app.pipeline.layout import (
+    count_columns,
+    has_running_header_or_footer,
+    split_into_columns,
+)
 
 FLAG_ITALIC = 1 << 1
 FLAG_BOLD = 1 << 4
@@ -69,7 +73,7 @@ def build_pages(pdf: pymupdf.Document) -> tuple[Page, ...]:
             placed.append(line)
 
         lines: list[Line] = []
-        for line in sort_into_reading_order(placed):
+        for line in sort_into_reading_order(placed, source.rect.width, source.rect.height):
             lines.append(replace(line, index=line_index))
             line_index += 1
 
@@ -98,7 +102,15 @@ def iter_raw_lines(source: pymupdf.Page) -> list[dict[str, Any]]:
     ]
 
 
-def sort_into_reading_order(lines: list[Line]) -> list[Line]:
+def sort_into_reading_order(lines: list[Line], width: float, height: float) -> list[Line]:
+    if not lines:
+        return []
+
+    columns = split_into_columns(tuple(lines), width, height)
+    return [line for column in columns for line in order_within_column(column)]
+
+
+def order_within_column(lines: list[Line]) -> list[Line]:
     if not lines:
         return []
 

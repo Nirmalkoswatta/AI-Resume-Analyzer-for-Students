@@ -155,3 +155,36 @@ def has_running_header_or_footer(pages: tuple[Page, ...]) -> bool:
 
 def furniture_key(text: str) -> str:
     return _DIGITS.sub("", text).strip().lower()
+
+
+def split_into_columns(lines: tuple[Line, ...], width: float, height: float) -> list[list[Line]]:
+    candidates = body_lines(lines, height)
+    if len(candidates) < MIN_LINES_FOR_COLUMN_DETECTION:
+        return [list(lines)]
+
+    gutter = find_gutter(candidates, width)
+    if gutter is None:
+        return [list(lines)]
+
+    left, right = split_at(candidates, gutter)
+    if not left or not right or not vertically_overlapping(left, right):
+        return [list(lines)]
+
+    return assign_every_line(lines, gutter)
+
+
+def assign_every_line(lines: tuple[Line, ...], gutter: float) -> list[list[Line]]:
+    left: list[Line] = []
+    right: list[Line] = []
+
+    for line in lines:
+        if line_midpoint(line) <= gutter:
+            left.append(line)
+        else:
+            right.append(line)
+
+    return [column for column in (left, right) if column]
+
+
+def line_midpoint(line: Line) -> float:
+    return (line.x0 + line.x1) / 2

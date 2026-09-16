@@ -1,6 +1,6 @@
 import type { ErrorResponse } from "@resume/schema";
 
-import { ACCEPTED_MIME_TYPE, MAX_UPLOAD_BYTES } from "./constants.ts";
+import { ACCEPTED_MIME_TYPE, MAX_UPLOAD_BYTES } from "@/lib/constants";
 
 export function localValidationError(file: File | null): ErrorResponse | null {
   if (!file) {

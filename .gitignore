@@ -27,3 +27,5 @@ services/api/app/models/*.bin
 Thumbs.db
 .vscode/
 .idea/
+
+/*.pdf

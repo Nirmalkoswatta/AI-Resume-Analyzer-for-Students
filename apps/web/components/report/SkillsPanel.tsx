@@ -6,6 +6,18 @@ export function SkillsPanel({ skills }: { skills: Skill[] }) {
   const demonstrated = skills.filter((skill) => skill.evidence === "demonstrated");
   const claimed = skills.filter((skill) => skill.evidence === "claimed");
 
+  if (skills.length === 0) {
+    return (
+      <Card title="Skills" description="Nothing here was recognised.">
+        <p className="text-sm text-ink-muted">
+          We match against a list of software and technology skills, so we could not identify
+          any in this resume. If you work in another field, that is a limit of this tool rather
+          than a problem with your resume.
+        </p>
+      </Card>
+    );
+  }
+
   return (
     <Card
       title="Skills"
