@@ -7,6 +7,7 @@ from app.schemas.enums import SectionKind
 
 MAX_HEADING_WORDS = 6
 LARGE_FONT_RATIO = 1.15
+HEADING_FONT_RATIO = 1.25
 TITLE_FONT_RATIO = 2.0
 MIN_TYPOGRAPHIC_SIGNALS = 1
 EXCERPT_MAX_CHARS = 200
@@ -48,9 +49,11 @@ def find_headings(document: Document) -> list[Heading]:
 def looks_like_heading(line: Line, median_font_size: float) -> bool:
     if line.text.endswith((".", ",", ";", ":")):
         return False
-    if not line.is_upper_case:
-        return False
     if is_document_title(line, median_font_size):
+        return False
+    if is_set_in_heading_type(line, median_font_size):
+        return True
+    if not line.is_upper_case:
         return False
 
     signals = (line.is_bold, is_larger_than_body(line, median_font_size))
@@ -61,6 +64,12 @@ def is_document_title(line: Line, median_font_size: float) -> bool:
     if median_font_size <= 0:
         return False
     return line.max_font_size >= median_font_size * TITLE_FONT_RATIO
+
+
+def is_set_in_heading_type(line: Line, median_font_size: float) -> bool:
+    if median_font_size <= 0:
+        return False
+    return line.max_font_size >= median_font_size * HEADING_FONT_RATIO
 
 
 def is_larger_than_body(line: Line, median_font_size: float) -> bool:

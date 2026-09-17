@@ -10,9 +10,11 @@ from app.errors import (
     NotMachineReadableError,
     TooManyPagesError,
 )
+from app.pipeline.document import Line, Span
 from app.pipeline.ingest import (
     MAX_LINES_FOR_TABLE_DETECTION,
     count_tables,
+    drop_unmappable_glyphs,
     normalise_font_name,
     parse_document,
 )
@@ -178,3 +180,53 @@ def test_lines_are_ordered_visually_not_by_block_order(
 
     assert tops == sorted(tops)
     assert document.lines[0].text == "Priya Fernando"
+
+
+def test_a_full_width_banner_does_not_hide_the_gutter_beneath_it(
+    banner_over_columns_pdf: bytes, settings: Settings
+) -> None:
+    document = parse_document(banner_over_columns_pdf, settings)
+
+    assert document.column_count == 2
+
+
+def test_columns_under_a_banner_are_read_one_after_the_other(
+    banner_over_columns_pdf: bytes, settings: Settings
+) -> None:
+    document = parse_document(banner_over_columns_pdf, settings)
+    texts = [line.text for line in document.lines]
+
+    assert texts.index("EDUCATION") < texts.index("SKILLS")
+
+
+def test_unmappable_glyphs_are_dropped_from_text() -> None:
+    assert drop_unmappable_glyphs("\uf0b7 Built REST endpoints") == " Built REST endpoints"
+    assert drop_unmappable_glyphs("Spanish \ufffd C2") == "Spanish  C2"
+
+
+def test_a_bullet_glyph_is_not_counted_as_a_word() -> None:
+    line = Line(
+        index=0,
+        page_number=1,
+        spans=(span_of(drop_unmappable_glyphs("\uf0b7 Built REST endpoints in Python")),),
+        x0=0.0,
+        top=0.0,
+        x1=100.0,
+        bottom=10.0,
+    )
+
+    assert line.word_count == 5
+
+
+def span_of(text: str) -> Span:
+    return Span(
+        text=text,
+        font="helv",
+        size=10.0,
+        bold=False,
+        italic=False,
+        x0=0.0,
+        top=0.0,
+        x1=1.0,
+        bottom=1.0,
+    )

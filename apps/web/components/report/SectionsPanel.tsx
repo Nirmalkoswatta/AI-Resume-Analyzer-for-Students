@@ -12,6 +12,9 @@ const SECTION_LABELS: Record<SectionKind, string> = {
   certifications: "Certifications",
   awards: "Awards",
   publications: "Publications",
+  languages: "Languages",
+  interests: "Interests",
+  references: "References",
   other: "Other",
 };
 

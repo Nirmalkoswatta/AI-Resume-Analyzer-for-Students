@@ -209,7 +209,7 @@ export interface components {
          * SectionKind
          * @enum {string}
          */
-        SectionKind: "contact" | "summary" | "education" | "experience" | "skills" | "projects" | "certifications" | "awards" | "publications" | "other";
+        SectionKind: "contact" | "summary" | "education" | "experience" | "skills" | "projects" | "certifications" | "awards" | "publications" | "languages" | "interests" | "references" | "other";
         /**
          * Severity
          * @enum {string}

@@ -180,6 +180,22 @@ into visual rows — group by vertical position within a tolerance of the median
 then left to right within each row — before assigning indices. Without this, headings lose
 their bodies and sections come out scrambled.
 
+Columns are found by looking for a vertical band of the page that few lines cross, not one
+that none do. Sidebar layouts almost always put a full-width name banner or summary above
+the two columns, and those few straddling lines used to hide the gutter completely, so the
+whole page was read row by row with the columns interleaved. A band is a gutter if at most
+12% of lines cross it and each side holds at least a fifth of them.
+
+A heading is recognised either by name, from `headings.yaml`, or by typography. The
+typographic test used to require ALL-CAPS, which made every Title Case heading invisible —
+"Skill Highlights" was read as body text and its bullets were filed under whatever section
+came before it. Type set 25% larger than the body median is now enough on its own, with the
+ALL-CAPS rule kept for headings set at body size.
+
+Text carries glyphs that map to no character: PDF bullet points are usually a private-use
+codepoint from Symbol or Wingdings. They are stripped at ingest, so they cannot be counted
+as words or appear in an excerpt shown to a student.
+
 A header or footer means *repeated page furniture*, not merely text near a page edge. It is
 detected by the same text appearing in the band on two or more pages, with digits stripped
 so "Page 1 of 3" matches "Page 2 of 3". A single-page resume can never have one. Judging it

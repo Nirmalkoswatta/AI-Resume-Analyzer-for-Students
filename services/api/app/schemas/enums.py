@@ -18,6 +18,9 @@ class SectionKind(StrEnum):
     CERTIFICATIONS = "certifications"
     AWARDS = "awards"
     PUBLICATIONS = "publications"
+    LANGUAGES = "languages"
+    INTERESTS = "interests"
+    REFERENCES = "references"
     OTHER = "other"
 
 

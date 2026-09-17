@@ -93,3 +93,13 @@ def misspelled_skills_pdf() -> bytes:
 @pytest.fixture
 def scrambled_order_pdf() -> bytes:
     return pdf_builder.scrambled_block_order_resume()
+
+
+@pytest.fixture
+def banner_over_columns_pdf() -> bytes:
+    return pdf_builder.two_column_resume_under_full_width_banner()
+
+
+@pytest.fixture
+def title_case_headings_pdf() -> bytes:
+    return pdf_builder.resume_with_title_case_headings()

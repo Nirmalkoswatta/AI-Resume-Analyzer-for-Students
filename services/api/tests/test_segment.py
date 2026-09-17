@@ -1,7 +1,8 @@
 from app.config import Settings
+from app.pipeline.document import Line, Span
 from app.pipeline.ingest import parse_document
 from app.pipeline.lexicon import get_heading_lexicon, normalise
-from app.pipeline.segment import segment
+from app.pipeline.segment import looks_like_heading, segment
 from app.schemas.enums import SectionKind
 
 
@@ -122,3 +123,61 @@ def test_a_heading_never_loses_its_body_to_block_order(
     sections, _ = segment(document)
 
     assert all(section.word_count > 0 for section in sections)
+
+
+def test_title_case_headings_are_recognised(
+    title_case_headings_pdf: bytes, settings: Settings
+) -> None:
+    assert kinds_of(title_case_headings_pdf, settings) == [
+        SectionKind.CONTACT,
+        SectionKind.SUMMARY,
+        SectionKind.SKILLS,
+        SectionKind.EXPERIENCE,
+        SectionKind.EDUCATION,
+        SectionKind.LANGUAGES,
+    ]
+
+
+def test_a_skills_section_titled_skill_highlights_is_not_reported_missing(
+    title_case_headings_pdf: bytes, settings: Settings
+) -> None:
+    document = parse_document(title_case_headings_pdf, settings)
+    _, missing = segment(document)
+
+    assert SectionKind.SKILLS not in missing
+
+
+def heading_line(text: str, size: float) -> Line:
+    return Line(
+        index=0,
+        page_number=1,
+        spans=(
+            Span(
+                text=text,
+                font="helv",
+                size=size,
+                bold=False,
+                italic=False,
+                x0=0.0,
+                top=0.0,
+                x1=1.0,
+                bottom=1.0,
+            ),
+        ),
+        x0=0.0,
+        top=0.0,
+        x1=100.0,
+        bottom=10.0,
+    )
+
+
+def test_a_title_case_heading_outside_the_lexicon_is_still_a_heading() -> None:
+    assert looks_like_heading(heading_line("Things I Have Shipped", 13.0), 10.0)
+
+
+def test_body_text_at_body_size_is_not_a_heading() -> None:
+    assert not looks_like_heading(heading_line("Built REST endpoints in Python", 10.0), 10.0)
+
+
+def test_the_document_title_is_not_treated_as_a_heading() -> None:
+    assert not looks_like_heading(heading_line("Priya Fernando", 24.0), 10.0)

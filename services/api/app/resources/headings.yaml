@@ -44,6 +44,10 @@ aliases:
     - technologies
     - technical proficiencies
     - tools and technologies
+    - skill highlights
+    - highlights
+    - areas of expertise
+    - strengths
   projects:
     - projects
     - personal projects
@@ -77,6 +81,18 @@ aliases:
     - research experience
     - papers
     - conference papers
+  languages:
+    - languages
+    - language skills
+    - spoken languages
+  interests:
+    - interests
+    - hobbies
+    - hobbies and interests
+    - interests and hobbies
+  references:
+    - references
+    - referees
   contact:
     - contact
     - contact details

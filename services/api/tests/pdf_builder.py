@@ -217,3 +217,67 @@ def scrambled_block_order_resume() -> bytes:
         write_lines(page, lines, LEFT_COLUMN_X, start_y)
 
     return to_bytes(document)
+
+
+def two_column_resume_under_full_width_banner() -> bytes:
+    document = new_document()
+    page = document.new_page(width=PAGE_WIDTH, height=PAGE_HEIGHT)
+    write_lines(
+        page,
+        [
+            ("Priya Fernando", 16.0),
+            ("Final year computer science student looking for a backend internship where", 10.0),
+            ("I can keep building the Python services I started at Reddy Labs last summer.", 10.0),
+        ],
+        LEFT_COLUMN_X,
+        90.0,
+    )
+
+    left = [
+        ("WORK EXPERIENCE", HEADING_FONT_SIZE),
+        ("Software Engineering Intern, Reddy Labs", BODY_FONT_SIZE),
+        ("Built REST endpoints in Python", BODY_FONT_SIZE),
+        ("Improved report load times", BODY_FONT_SIZE),
+        ("Wrote unit tests for the billing module", BODY_FONT_SIZE),
+        ("EDUCATION", HEADING_FONT_SIZE),
+        ("BSc Computer Science, Colombo", BODY_FONT_SIZE),
+        ("Graduating 2027", BODY_FONT_SIZE),
+    ]
+    right = [
+        ("SKILLS", HEADING_FONT_SIZE),
+        ("Python", BODY_FONT_SIZE),
+        ("JavaScript", BODY_FONT_SIZE),
+        ("React", BODY_FONT_SIZE),
+        ("PostgreSQL", BODY_FONT_SIZE),
+        ("Git", BODY_FONT_SIZE),
+        ("Docker", BODY_FONT_SIZE),
+        ("Linux", BODY_FONT_SIZE),
+    ]
+
+    write_lines(page, left, LEFT_COLUMN_X, 180.0)
+    write_lines(page, right, RIGHT_COLUMN_X, 180.0)
+    return to_bytes(document)
+
+
+def resume_with_title_case_headings() -> bytes:
+    document = new_document()
+    page = document.new_page(width=PAGE_WIDTH, height=PAGE_HEIGHT)
+    write_lines(
+        page,
+        [
+            ("Priya Fernando", 20.0),
+            ("Summary", HEADING_FONT_SIZE),
+            ("Final year computer science student.", BODY_FONT_SIZE),
+            ("Skill Highlights", HEADING_FONT_SIZE),
+            ("Python, JavaScript, React, SQL, Git", BODY_FONT_SIZE),
+            ("Experience", HEADING_FONT_SIZE),
+            ("Software Engineering Intern, Reddy Labs", BODY_FONT_SIZE),
+            ("Education", HEADING_FONT_SIZE),
+            ("BSc Computer Science, Colombo", BODY_FONT_SIZE),
+            ("Languages", HEADING_FONT_SIZE),
+            ("Sinhala, Tamil, English", BODY_FONT_SIZE),
+        ],
+        LEFT_COLUMN_X,
+        90.0,
+    )
+    return to_bytes(document)

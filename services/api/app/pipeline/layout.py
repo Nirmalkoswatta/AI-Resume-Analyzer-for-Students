@@ -11,6 +11,8 @@ MIN_GUTTER_RATIO = 0.05
 GUTTER_SEARCH_MARGIN_RATIO = 0.2
 MIN_LINES_FOR_COLUMN_DETECTION = 8
 MIN_VERTICAL_OVERLAP_RATIO = 0.4
+MAX_GUTTER_CROSSING_RATIO = 0.12
+MIN_COLUMN_SHARE = 0.2
 MIN_PAGES_FOR_RUNNING_FURNITURE = 2
 MIN_REPEATS_FOR_RUNNING_FURNITURE = 2
 
@@ -40,42 +42,48 @@ def body_lines(lines: tuple[Line, ...], height: float) -> list[Line]:
 
 
 def count_columns(lines: tuple[Line, ...], width: float, height: float) -> int:
+    return 2 if detect_gutter(lines, width, height) is not None else 1
+
+
+def detect_gutter(lines: tuple[Line, ...], width: float, height: float) -> float | None:
     candidates = body_lines(lines, height)
     if len(candidates) < MIN_LINES_FOR_COLUMN_DETECTION:
-        return 1
+        return None
 
     gutter = find_gutter(candidates, width)
     if gutter is None:
-        return 1
+        return None
 
     left, right = split_at(candidates, gutter)
-    if not left or not right:
-        return 1
+    if min(len(left), len(right)) < len(candidates) * MIN_COLUMN_SHARE:
+        return None
     if not vertically_overlapping(left, right):
-        return 1
+        return None
 
-    return 2
+    return gutter
 
 
-def build_occupancy(lines: list[Line], width: float) -> list[bool]:
+def count_lines_per_bin(lines: list[Line], width: float) -> list[int]:
     bin_count = max(1, int(width / GUTTER_BIN_WIDTH))
-    occupied = [False] * bin_count
+    crossings = [0] * bin_count
 
     for line in lines:
         start = max(0, int(line.x0 / GUTTER_BIN_WIDTH))
         end = min(bin_count - 1, int(line.x1 / GUTTER_BIN_WIDTH))
         for index in range(start, end + 1):
-            occupied[index] = True
+            crossings[index] += 1
 
-    return occupied
+    return crossings
 
 
-def empty_runs(occupied: list[bool], start: int, end: int) -> list[tuple[int, int]]:
+def sparse_runs(
+    crossings: list[int], start: int, end: int, tolerance: int
+) -> list[tuple[int, int]]:
     runs: list[tuple[int, int]] = []
     run_start: int | None = None
 
     for index in range(start, end):
-        if not occupied[index]:
+        if crossings[index] <= tolerance:
             if run_start is None:
                 run_start = index
             continue
@@ -90,19 +98,20 @@ def empty_runs(occupied: list[bool], start: int, end: int) -> list[tuple[int, in
 
 
 def find_gutter(lines: list[Line], width: float) -> float | None:
-    occupied = build_occupancy(lines, width)
-    bin_count = len(occupied)
+    crossings = count_lines_per_bin(lines, width)
+    bin_count = len(crossings)
 
     search_start = int(bin_count * GUTTER_SEARCH_MARGIN_RATIO)
     search_end = int(bin_count * (1.0 - GUTTER_SEARCH_MARGIN_RATIO))
     minimum_run = max(1, int(bin_count * MIN_GUTTER_RATIO))
+    tolerance = int(len(lines) * MAX_GUTTER_CROSSING_RATIO)
 
     widest: tuple[int, int] | None = None
 
-    for run_start, run_end in empty_runs(occupied, search_start, search_end):
+    for run_start, run_end in sparse_runs(crossings, search_start, search_end, tolerance):
         if run_end - run_start < minimum_run:
             continue
-        if not any(occupied[:run_start]) or not any(occupied[run_end:]):
+        if not any(crossings[:run_start]) or not any(crossings[run_end:]):
             continue
         if widest is None or run_end - run_start > widest[1] - widest[0]:
             widest = (run_start, run_end)
@@ -158,16 +167,8 @@ def furniture_key(text: str) -> str:
 
 
 def split_into_columns(lines: tuple[Line, ...], width: float, height: float) -> list[list[Line]]:
-    candidates = body_lines(lines, height)
-    if len(candidates) < MIN_LINES_FOR_COLUMN_DETECTION:
-        return [list(lines)]
-
-    gutter = find_gutter(candidates, width)
+    gutter = detect_gutter(lines, width, height)
     if gutter is None:
-        return [list(lines)]
-
-    left, right = split_at(candidates, gutter)
-    if not left or not right or not vertically_overlapping(left, right):
         return [list(lines)]
 
     return assign_every_line(lines, gutter)

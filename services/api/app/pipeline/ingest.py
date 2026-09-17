@@ -1,3 +1,4 @@
+import re
 from dataclasses import replace
 from statistics import median
 from typing import Any
@@ -21,6 +22,8 @@ from app.pipeline.layout import (
 
 FLAG_ITALIC = 1 << 1
 FLAG_BOLD = 1 << 4
+
+UNMAPPABLE_GLYPHS = re.compile(r"[-�]")
 
 MAX_LINES_FOR_TABLE_DETECTION = 300
 ROW_TOLERANCE_RATIO = 0.6
@@ -156,7 +159,7 @@ def build_span(raw_span: dict[str, Any]) -> Span:
     font = str(raw_span.get("font", ""))
 
     return Span(
-        text=str(raw_span.get("text", "")),
+        text=drop_unmappable_glyphs(str(raw_span.get("text", ""))),
         font=font,
         size=float(raw_span.get("size", 0.0)),
         bold=bool(flags & FLAG_BOLD) or "bold" in font.lower(),
@@ -166,6 +169,10 @@ def build_span(raw_span: dict[str, Any]) -> Span:
         x1=float(x1),
         bottom=float(bottom),
     )
+
+
+def drop_unmappable_glyphs(text: str) -> str:
+    return UNMAPPABLE_GLYPHS.sub("", text)
 
 
 def count_tables(source: pymupdf.Page, line_count: int) -> int:

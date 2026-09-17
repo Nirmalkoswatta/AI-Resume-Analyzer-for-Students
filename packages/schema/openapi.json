@@ -447,6 +447,9 @@
           "certifications",
           "awards",
           "publications",
+          "languages",
+          "interests",
+          "references",
           "other"
         ],
         "title": "SectionKind",
