@@ -1,0 +1,138 @@
+expected_sections:
+  - contact
+  - summary
+  - education
+  - experience
+  - skills
+  - projects
+
+aliases:
+  summary:
+    - summary
+    - professional summary
+    - career summary
+    - profile
+    - about me
+    - objective
+    - career objective
+    - personal statement
+  education:
+    - education
+    - academic background
+    - academics
+    - educational qualifications
+    - qualifications
+    - academic qualifications
+  experience:
+    - experience
+    - work experience
+    - work history
+    - employment
+    - employment history
+    - professional experience
+    - industry experience
+    - internships
+    - internship experience
+    - relevant experience
+  skills:
+    - skills
+    - technical skills
+    - core skills
+    - key skills
+    - competencies
+    - core competencies
+    - technologies
+    - technical proficiencies
+    - tools and technologies
+    - skill highlights
+    - highlights
+    - areas of expertise
+    - strengths
+  projects:
+    - projects
+    - personal projects
+    - academic projects
+    - selected projects
+    - project experience
+    - portfolio
+  certifications:
+    - certifications
+    - certificates
+    - licenses and certifications
+    - courses
+    - online courses
+    - professional development
+  awards:
+    - awards
+    - honors
+    - honours
+    - awards and honors
+    - awards and honours
+    - achievements
+    - accomplishments
+    - extracurricular activities
+    - activities
+    - volunteering
+    - volunteer experience
+    - leadership
+  publications:
+    - publications
+    - research
+    - research experience
+    - papers
+    - conference papers
+  languages:
+    - languages
+    - language skills
+    - spoken languages
+  interests:
+    - interests
+    - hobbies
+    - hobbies and interests
+    - interests and hobbies
+  references:
+    - references
+    - referees
+  contact:
+    - contact
+    - contact details
+    - contact info
+    - contact information
+    - personal details
+    - details
+
+missing_section_advice:
+  summary:
+    severity: low
+    title: Add a short summary at the top
+    detail: >-
+      Two lines saying what you study and what you are looking for gives a recruiter context
+      before they reach your experience.
+  education:
+    severity: critical
+    title: Add an Education section
+    detail: >-
+      As a student this is the section employers look for first. Include your degree,
+      institution and expected graduation year.
+  experience:
+    severity: high
+    title: Add an Experience section
+    detail: >-
+      Internships, part-time work, teaching assistance and volunteering all count. Describe what
+      you did and what resulted.
+  skills:
+    severity: high
+    title: Add a Skills section
+    detail: >-
+      A short, scannable list of tools and languages is how most keyword matching finds you.
+  projects:
+    severity: medium
+    title: Add a Projects section
+    detail: >-
+      With limited work history, coursework and personal projects are your strongest evidence.
+      Two entries with links are enough.
+  contact:
+    severity: critical
+    title: Add your contact details
+    detail: >-
+      No contact block was found. Put your name, email and phone number at the top of page one.
