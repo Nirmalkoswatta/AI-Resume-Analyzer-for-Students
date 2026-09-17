@@ -11,12 +11,21 @@ HEADING_FONT_RATIO = 1.25
 TITLE_FONT_RATIO = 2.0
 MIN_TYPOGRAPHIC_SIGNALS = 1
 EXCERPT_MAX_CHARS = 200
+MIN_UNLABELLED_SECTION_WORDS = 10
 
 
 @dataclass(frozen=True)
 class Heading:
     line: Line
     kind: SectionKind
+
+
+@dataclass(frozen=True)
+class SectionStart:
+    boundary: int
+    body_start: int
+    kind: SectionKind
+    heading: str | None
 
 
 def segment(document: Document) -> tuple[list[DetectedSection], list[SectionKind]]:
@@ -84,23 +93,60 @@ def build_sections(document: Document, headings: list[Heading]) -> list[Detected
         return []
 
     body_headings = drop_headings_above_contact_block(headings)
+    starts = section_starts(document, body_headings)
+    end = lines[-1].index + 1
 
     sections: list[DetectedSection] = []
-    boundaries = [heading.line.index for heading in body_headings]
 
-    contact_end = boundaries[0] if boundaries else lines[-1].index + 1
+    contact_end = starts[0].boundary if starts else end
     contact_lines = [line for line in lines if line.index < contact_end]
     if contact_lines:
         sections.append(build_section(SectionKind.CONTACT, None, contact_lines))
 
-    for position, heading in enumerate(body_headings):
-        next_boundary = (
-            boundaries[position + 1] if position + 1 < len(boundaries) else lines[-1].index + 1
-        )
-        body = [line for line in lines if heading.line.index < line.index < next_boundary]
-        sections.append(build_section(heading.kind, heading.line.text, body))
+    for position, start in enumerate(starts):
+        next_boundary = starts[position + 1].boundary if position + 1 < len(starts) else end
+        body = [line for line in lines if start.body_start <= line.index < next_boundary]
+        sections.append(build_section(start.kind, start.heading, body))
 
     return merge_repeated_kinds(sections)
+
+
+def section_starts(document: Document, headings: list[Heading]) -> list[SectionStart]:
+    labelled = [
+        SectionStart(
+            boundary=heading.line.index,
+            body_start=heading.line.index + 1,
+            kind=heading.kind,
+            heading=heading.line.text,
+        )
+        for heading in headings
+    ]
+    unlabelled = [
+        SectionStart(boundary=index, body_start=index, kind=SectionKind.OTHER, heading=None)
+        for index in reportable_column_starts(document, headings)
+    ]
+
+    return sorted(labelled + unlabelled, key=lambda start: start.boundary)
+
+
+def reportable_column_starts(document: Document, headings: list[Heading]) -> list[int]:
+    heading_indices = sorted(heading.line.index for heading in headings)
+    taken = set(heading_indices)
+    end = document.lines[-1].index + 1
+
+    starts: list[int] = []
+    for index in document.column_start_indices:
+        if index in taken:
+            continue
+        stop = next((boundary for boundary in heading_indices if boundary > index), end)
+        if words_between(document, index, stop) >= MIN_UNLABELLED_SECTION_WORDS:
+            starts.append(index)
+
+    return starts
+
+
+def words_between(document: Document, start: int, stop: int) -> int:
+    return sum(line.word_count for line in document.lines if start <= line.index < stop)
 
 
 def drop_headings_above_contact_block(headings: list[Heading]) -> list[Heading]:

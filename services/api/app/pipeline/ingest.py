@@ -76,9 +76,13 @@ def build_pages(pdf: pymupdf.Document) -> tuple[Page, ...]:
             placed.append(line)
 
         lines: list[Line] = []
-        for line in sort_into_reading_order(placed, source.rect.width, source.rect.height):
-            lines.append(replace(line, index=line_index))
-            line_index += 1
+        column_starts: list[int] = []
+        for column in read_in_column_order(placed, source.rect.width, source.rect.height):
+            if lines:
+                column_starts.append(line_index)
+            for line in column:
+                lines.append(replace(line, index=line_index))
+                line_index += 1
 
         pages.append(
             Page(
@@ -86,6 +90,7 @@ def build_pages(pdf: pymupdf.Document) -> tuple[Page, ...]:
                 width=source.rect.width,
                 height=source.rect.height,
                 lines=tuple(lines),
+                column_start_indices=tuple(column_starts),
                 image_count=len(source.get_images(full=True)),
                 table_count=count_tables(source, len(lines)),
                 character_count=len(source.get_text().strip()),
@@ -105,12 +110,12 @@ def iter_raw_lines(source: pymupdf.Page) -> list[dict[str, Any]]:
     ]
 
 
-def sort_into_reading_order(lines: list[Line], width: float, height: float) -> list[Line]:
+def read_in_column_order(lines: list[Line], width: float, height: float) -> list[list[Line]]:
     if not lines:
         return []
 
     columns = split_into_columns(tuple(lines), width, height)
-    return [line for column in columns for line in order_within_column(column)]
+    return [order_within_column(column) for column in columns]
 
 
 def order_within_column(lines: list[Line]) -> list[Line]:

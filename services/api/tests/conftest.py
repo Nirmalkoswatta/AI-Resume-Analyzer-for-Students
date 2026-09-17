@@ -103,3 +103,13 @@ def banner_over_columns_pdf() -> bytes:
 @pytest.fixture
 def title_case_headings_pdf() -> bytes:
     return pdf_builder.resume_with_title_case_headings()
+
+
+@pytest.fixture
+def unlabelled_main_column_pdf() -> bytes:
+    return pdf_builder.sidebar_resume_with_unlabelled_main_column()
+
+
+@pytest.fixture
+def stray_line_main_column_pdf() -> bytes:
+    return pdf_builder.sidebar_resume_with_stray_line_in_main_column()

@@ -1,9 +1,16 @@
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, expect, test } from "vitest";
-import type { AtsScore, RoleFit, Skill, Suggestion } from "@resume/schema";
+import type {
+  AtsScore,
+  DetectedSection,
+  RoleFit,
+  Skill,
+  Suggestion,
+} from "@resume/schema";
 
 import { AtsPanel } from "@/components/report/AtsPanel";
 import { FitPanel } from "@/components/report/FitPanel";
+import { SectionsPanel } from "@/components/report/SectionsPanel";
 import { SkillsPanel } from "@/components/report/SkillsPanel";
 import { SuggestionsPanel } from "@/components/report/SuggestionsPanel";
 
@@ -141,4 +148,36 @@ test("suggestions are ordered by severity regardless of input order", () => {
   const headings = screen.getAllByRole("heading", { level: 3 }).map((node) => node.textContent);
 
   expect(headings).toEqual(["Most urgent", "Middle", "Least urgent"]);
+});
+
+function section(
+  kind: DetectedSection["kind"],
+  heading: string | null,
+  wordCount: number,
+  lineStart: number,
+): DetectedSection {
+  return {
+    kind,
+    heading,
+    word_count: wordCount,
+    location: { page: 1, line_start: lineStart, line_end: lineStart + 2, excerpt: "" },
+  };
+}
+
+test("a block with no heading is labelled rather than rendered blank", () => {
+  render(
+    <SectionsPanel
+      sections={[section("other", null, 17, 12), section("languages", "Languages", 2, 30)]}
+      missing={[]}
+    />,
+  );
+
+  expect(screen.getByText(/no heading/i)).toBeDefined();
+  expect(screen.getByText("Languages")).toBeDefined();
+});
+
+test("missing sections are named so the advice is actionable", () => {
+  render(<SectionsPanel sections={[section("skills", "Skills", 12, 3)]} missing={["projects"]} />);
+
+  expect(screen.getByText("Projects")).toBeDefined();
 });

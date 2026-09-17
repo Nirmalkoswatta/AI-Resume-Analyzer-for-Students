@@ -7,6 +7,7 @@ from contextvars import ContextVar
 from typing import Any
 
 from app.schemas.analysis import AnalysisResult
+from app.schemas.enums import SectionKind
 
 REQUEST_ID_HEADER = "X-Request-Id"
 MAX_REQUEST_ID_LENGTH = 64
@@ -85,7 +86,14 @@ def describe_analysis(result: AnalysisResult) -> dict[str, Any]:
         "sections": [section.kind.value for section in result.sections],
         "missing_sections": [kind.value for kind in result.missing_sections],
         "unrecognised_headings": sum(
-            1 for section in result.sections if section.kind.value == "other"
+            1
+            for section in result.sections
+            if section.kind is SectionKind.OTHER and section.heading is not None
+        ),
+        "unlabelled_blocks": sum(
+            1
+            for section in result.sections
+            if section.kind is SectionKind.OTHER and section.heading is None
         ),
         "skills_found": len(result.skills),
         "ats_score": result.ats.score,

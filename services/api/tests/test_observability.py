@@ -126,3 +126,13 @@ def test_analysis_log_keeps_what_is_needed_to_diagnose(
     assert "single_column_layout" in described["failed_checks"]
     assert described["pages"] == 1
     assert "skills_found" in described
+
+
+def test_a_block_with_no_heading_is_not_counted_as_an_unrecognised_heading(
+    unlabelled_main_column_pdf: bytes, settings: Settings
+) -> None:
+    result = analyze_resume(unlabelled_main_column_pdf, None, settings)
+    payload = describe_analysis(result)
+
+    assert payload["unrecognised_headings"] == 0
+    assert payload["unlabelled_blocks"] == 1

@@ -281,3 +281,59 @@ def resume_with_title_case_headings() -> bytes:
         90.0,
     )
     return to_bytes(document)
+
+
+SIDEBAR_COLUMN = [
+    ("SKILLS", HEADING_FONT_SIZE),
+    ("Python", BODY_FONT_SIZE),
+    ("JavaScript", BODY_FONT_SIZE),
+    ("React", BODY_FONT_SIZE),
+    ("PostgreSQL", BODY_FONT_SIZE),
+    ("LANGUAGES", HEADING_FONT_SIZE),
+    ("Sinhala", BODY_FONT_SIZE),
+    ("English", BODY_FONT_SIZE),
+]
+
+MAIN_COLUMN_BELOW_SUMMARY = [
+    ("WORK EXPERIENCE", HEADING_FONT_SIZE),
+    ("Software Engineering Intern, Reddy Labs", BODY_FONT_SIZE),
+    ("Built REST endpoints in Python", BODY_FONT_SIZE),
+    ("Improved report load times", BODY_FONT_SIZE),
+    ("EDUCATION", HEADING_FONT_SIZE),
+    ("BSc Computer Science, Colombo", BODY_FONT_SIZE),
+]
+
+
+def sidebar_resume_with_unlabelled_main_column() -> bytes:
+    document = new_document()
+    page = document.new_page(width=PAGE_WIDTH, height=PAGE_HEIGHT)
+    page.insert_text((LEFT_COLUMN_X, 90.0), "Priya Fernando", fontsize=16.0, fontname="helv")
+
+    write_lines(page, SIDEBAR_COLUMN, LEFT_COLUMN_X, 140.0)
+    write_lines(
+        page,
+        [
+            ("Final year computer science student", BODY_FONT_SIZE),
+            ("looking for a backend internship where", BODY_FONT_SIZE),
+            ("I can keep writing Python services", BODY_FONT_SIZE),
+            *MAIN_COLUMN_BELOW_SUMMARY,
+        ],
+        RIGHT_COLUMN_X,
+        140.0,
+    )
+    return to_bytes(document)
+
+
+def sidebar_resume_with_stray_line_in_main_column() -> bytes:
+    document = new_document()
+    page = document.new_page(width=PAGE_WIDTH, height=PAGE_HEIGHT)
+    page.insert_text((LEFT_COLUMN_X, 90.0), "Priya Fernando", fontsize=16.0, fontname="helv")
+
+    write_lines(page, SIDEBAR_COLUMN, LEFT_COLUMN_X, 140.0)
+    write_lines(
+        page,
+        [("priya.f@example.com", BODY_FONT_SIZE), *MAIN_COLUMN_BELOW_SUMMARY],
+        RIGHT_COLUMN_X,
+        140.0,
+    )
+    return to_bytes(document)

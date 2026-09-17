@@ -53,6 +53,7 @@ class Page:
     width: float
     height: float
     lines: tuple[Line, ...]
+    column_start_indices: tuple[int, ...]
     image_count: int
     table_count: int
     character_count: int
@@ -72,6 +73,10 @@ class Document:
     @cached_property
     def lines(self) -> tuple[Line, ...]:
         return tuple(line for page in self.pages for line in page.lines)
+
+    @cached_property
+    def column_start_indices(self) -> tuple[int, ...]:
+        return tuple(index for page in self.pages for index in page.column_start_indices)
 
     @cached_property
     def page_count(self) -> int:

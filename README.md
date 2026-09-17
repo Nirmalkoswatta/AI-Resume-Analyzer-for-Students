@@ -192,6 +192,15 @@ typographic test used to require ALL-CAPS, which made every Title Case heading i
 came before it. Type set 25% larger than the body median is now enough on its own, with the
 ALL-CAPS rule kept for headings set at body size.
 
+Flattening columns into one stream creates a boundary problem of its own: without help, the
+last section of the sidebar swallows everything at the top of the main column, because the
+next heading is what would otherwise end it. `ingest` therefore records where each column
+begins and `segment` treats that as a section boundary. Main columns often open with an
+unlabelled summary, so content there becomes a section with no heading rather than being
+filed under the sidebar's last heading. A column that opens with a stray line instead —
+an email stranded beside the header — is left where it is, since a one-word section is
+noise on a report a student has to read.
+
 Text carries glyphs that map to no character: PDF bullet points are usually a private-use
 codepoint from Symbol or Wingdings. They are stripped at ingest, so they cannot be counted
 as words or appear in an excerpt shown to a student.

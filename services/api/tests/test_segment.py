@@ -3,6 +3,7 @@ from app.pipeline.document import Line, Span
 from app.pipeline.ingest import parse_document
 from app.pipeline.lexicon import get_heading_lexicon, normalise
 from app.pipeline.segment import looks_like_heading, segment
+from app.schemas.analysis import DetectedSection
 from app.schemas.enums import SectionKind
 
 
@@ -181,3 +182,46 @@ def test_body_text_at_body_size_is_not_a_heading() -> None:
 
 def test_the_document_title_is_not_treated_as_a_heading() -> None:
     assert not looks_like_heading(heading_line("Priya Fernando", 24.0), 10.0)
+
+
+def sections_of(payload: bytes, settings: Settings) -> list[DetectedSection]:
+    document = parse_document(payload, settings)
+    sections, _ = segment(document)
+    return sections
+
+
+def test_a_sidebar_section_does_not_absorb_the_next_column(
+    unlabelled_main_column_pdf: bytes, settings: Settings
+) -> None:
+    languages = next(
+        section
+        for section in sections_of(unlabelled_main_column_pdf, settings)
+        if section.kind is SectionKind.LANGUAGES
+    )
+
+    assert languages.word_count == 2
+
+
+def test_an_unlabelled_column_opening_becomes_its_own_section(
+    unlabelled_main_column_pdf: bytes, settings: Settings
+) -> None:
+    unlabelled = [
+        section
+        for section in sections_of(unlabelled_main_column_pdf, settings)
+        if section.kind is SectionKind.OTHER and section.heading is None
+    ]
+
+    assert len(unlabelled) == 1
+    assert unlabelled[0].word_count == 17
+
+
+def test_a_stray_line_is_too_small_to_report_as_a_section(
+    stray_line_main_column_pdf: bytes, settings: Settings
+) -> None:
+    sections = sections_of(stray_line_main_column_pdf, settings)
+
+    assert not [
+        section
+        for section in sections
+        if section.kind is SectionKind.OTHER and section.heading is None
+    ]
