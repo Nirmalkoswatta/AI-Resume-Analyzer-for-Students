@@ -333,8 +333,23 @@ Swap in server-side rendering only if you later need a PDF nobody is watching a 
 for — emailing reports, or a queue job. For a student clicking download, this is the whole
 feature.
 
+### Preparing training data
+
+`ml/scrub_pii.py` masks emails, links, phone numbers and postal codes in a JSONL corpus:
+
+```bash
+python ml/scrub_pii.py --input raw.jsonl --output clean.jsonl --field text
+```
+
+Patterns cannot catch names or street addresses. Treat the output as reduced-risk, not
+anonymous, and add a named-entity pass before storing or sharing a corpus.
+
 Not built yet:
 
+- **Full O*NET / ESCO taxonomy** � `ml/build_gazetteer.py` is ready but needs you to download
+  the source under its licence. Generated ids are prefixed `onet:` or `esco:`, while
+  `roles.yaml` references `seed:` ids, so regenerating without remapping the roles orphans
+  them. `test_every_role_skill_exists_in_the_taxonomy` fails when that happens.
 - **Trained models** — role classifier and skill NER, per the ceiling noted above. Strip PII
   at ingest before training on any public resume corpus; those datasets contain real
   people's names, emails, and phone numbers, and nothing downstream needs identity.

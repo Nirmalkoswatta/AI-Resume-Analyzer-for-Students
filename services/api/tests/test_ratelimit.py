@@ -1,12 +1,16 @@
+import time
 from typing import Any
 
+import fakeredis
 import pytest
 from fastapi import Request
 from fastapi.testclient import TestClient
+from redis.exceptions import ConnectionError as RedisConnectionError
 
 from app.config import Settings
 from app.ratelimit import (
     MAX_TRACKED_CLIENTS,
+    RedisSlidingWindowLimiter,
     SlidingWindowLimiter,
     build_limiter,
     client_key,
@@ -131,3 +135,72 @@ def test_health_is_not_rate_limited(client: TestClient, monkeypatch: pytest.Monk
     monkeypatch.setattr(get_limiter(), "limit", 1)
 
     assert all(client.get("/v1/health").status_code == 200 for _ in range(5))
+
+
+def redis_limiter(
+    limit: int, window_seconds: float, server: fakeredis.FakeServer
+) -> RedisSlidingWindowLimiter:
+    return RedisSlidingWindowLimiter(
+        fakeredis.FakeRedis(server=server), limit=limit, window_seconds=window_seconds
+    )
+
+
+def test_redis_allows_up_to_the_limit_then_blocks() -> None:
+    limiter = redis_limiter(2, 60.0, fakeredis.FakeServer())
+
+    assert [limiter.check("a", 0.0) for _ in range(2)] == [None, None]
+    retry_after = limiter.check("a", 0.0)
+
+    assert retry_after is not None
+    assert 0 < retry_after <= 60.0
+
+
+def test_redis_clients_are_tracked_separately() -> None:
+    limiter = redis_limiter(1, 60.0, fakeredis.FakeServer())
+    limiter.check("a", 0.0)
+
+    assert limiter.check("b", 0.0) is None
+    assert limiter.check("a", 0.0) is not None
+
+
+def test_redis_window_is_shared_across_instances() -> None:
+    server = fakeredis.FakeServer()
+    first = redis_limiter(2, 60.0, server)
+    second = redis_limiter(2, 60.0, server)
+
+    first.check("a", 0.0)
+    second.check("a", 0.0)
+
+    assert first.check("a", 0.0) is not None
+    assert second.check("a", 0.0) is not None
+
+
+def test_redis_window_expires() -> None:
+    limiter = redis_limiter(1, 0.2, fakeredis.FakeServer())
+    limiter.check("a", 0.0)
+    assert limiter.check("a", 0.0) is not None
+
+    time.sleep(0.3)
+
+    assert limiter.check("a", 0.0) is None
+
+
+def test_redis_outage_fails_open(monkeypatch: pytest.MonkeyPatch) -> None:
+    limiter = redis_limiter(1, 60.0, fakeredis.FakeServer())
+
+    def unreachable(*_: object, **__: object) -> int:
+        raise RedisConnectionError("down")
+
+    monkeypatch.setattr(limiter, "script", unreachable)
+
+    assert [limiter.check("a", 0.0) for _ in range(3)] == [None, None, None]
+
+
+def test_redis_backend_selected_by_url() -> None:
+    limiter = build_limiter(Settings(redis_url="redis://localhost:6379/0"))
+
+    assert isinstance(limiter, RedisSlidingWindowLimiter)
+
+
+def test_memory_backend_is_default() -> None:
+    assert isinstance(build_limiter(Settings()), SlidingWindowLimiter)

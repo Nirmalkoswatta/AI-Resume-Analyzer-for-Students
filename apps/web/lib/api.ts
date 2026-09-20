@@ -47,3 +47,22 @@ export async function requestAnalysis(
 
   return payload as AnalysisResult;
 }
+
+export async function requestReportPdf(result: AnalysisResult): Promise<ArrayBuffer> {
+  const response = await fetch(apiUrl("/v1/report"), {
+    method: "POST",
+    body: JSON.stringify(result),
+    headers: { "content-type": "application/json" },
+    cache: "no-store",
+  });
+
+  if (!response.ok) {
+    throw new AnalysisFailed(response.status, {
+      code: "internal_error",
+      message: "The report could not be generated.",
+      remediation: "Try again in a moment.",
+    });
+  }
+
+  return response.arrayBuffer();
+}

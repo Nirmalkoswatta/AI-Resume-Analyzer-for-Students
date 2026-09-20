@@ -56,6 +56,28 @@ export function Analyzer() {
     }
   }
 
+  async function downloadReport(analysis: AnalysisResult) {
+    try {
+      const response = await fetch("/api/report", {
+        method: "POST",
+        body: JSON.stringify(analysis),
+        headers: { "content-type": "application/json" },
+      });
+      if (!response.ok) {
+        throw new Error("report generation failed");
+      }
+
+      const url = URL.createObjectURL(await response.blob());
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "resume-report.pdf";
+      link.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      window.print();
+    }
+  }
+
   function reset() {
     setResult(null);
     setError(null);
@@ -78,7 +100,7 @@ export function Analyzer() {
           <div className="screen-only flex gap-2">
             <button
               type="button"
-              onClick={() => window.print()}
+              onClick={() => void downloadReport(result)}
               className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white"
             >
               Download as PDF

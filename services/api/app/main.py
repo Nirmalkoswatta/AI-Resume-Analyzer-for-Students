@@ -15,7 +15,7 @@ from app.observability import (
     current_request_id,
     new_request_id,
 )
-from app.routers import analyze, health
+from app.routers import analyze, health, report
 from app.schemas.errors import ErrorResponse
 
 logger = logging.getLogger("resume.request")
@@ -78,6 +78,7 @@ def create_app() -> FastAPI:
 
     app.include_router(health.router, prefix="/v1")
     app.include_router(analyze.router, prefix="/v1")
+    app.include_router(report.router, prefix="/v1")
 
     @app.exception_handler(AnalysisError)
     async def handle_analysis_error(_: Request, error: AnalysisError) -> JSONResponse:

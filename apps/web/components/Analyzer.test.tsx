@@ -193,3 +193,41 @@ test("a blank job description is omitted from the request", async () => {
   await waitFor(() => expect(fetchMock).toHaveBeenCalled());
   expect(sentBody(fetchMock).get("job_description")).toBeNull();
 });
+
+async function reachReport(fetchMock: ReturnType<typeof vi.fn>): Promise<void> {
+  vi.stubGlobal("fetch", fetchMock);
+  render(<Analyzer />);
+  attach(pdf());
+  submit();
+  await waitFor(() => expect(screen.getByText(/Analyzed 2 pages/)).toBeDefined());
+}
+
+test("download posts the result to the report endpoint", async () => {
+  const fetchMock = vi
+    .fn()
+    .mockResolvedValueOnce({ ok: true, json: async () => RESULT })
+    .mockResolvedValueOnce({ ok: true, blob: async () => new Blob(["%PDF"]) });
+  vi.stubGlobal("URL", { createObjectURL: () => "blob:x", revokeObjectURL: () => undefined });
+  await reachReport(fetchMock);
+
+  fireEvent.click(screen.getByRole("button", { name: /download as pdf/i }));
+
+  await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
+  const [url, init] = fetchMock.mock.calls[1] as [string, RequestInit];
+  expect(url).toBe("/api/report");
+  expect(JSON.parse(init.body as string)).toEqual(RESULT);
+});
+
+test("download falls back to the browser print dialog when the server fails", async () => {
+  const print = vi.fn();
+  vi.stubGlobal("print", print);
+  const fetchMock = vi
+    .fn()
+    .mockResolvedValueOnce({ ok: true, json: async () => RESULT })
+    .mockResolvedValueOnce({ ok: false });
+  await reachReport(fetchMock);
+
+  fireEvent.click(screen.getByRole("button", { name: /download as pdf/i }));
+
+  await waitFor(() => expect(print).toHaveBeenCalledOnce());
+});

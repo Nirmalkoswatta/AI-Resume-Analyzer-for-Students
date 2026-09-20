@@ -8,6 +8,7 @@ dependencies = [
     "pydantic>=2.9",
     "pymupdf>=1.26",
     "rapidfuzz>=3.9",
+    "redis>=5.2",
     "pyyaml>=6.0",
     "pydantic-settings>=2.5",
     "python-multipart>=0.0.20",
@@ -16,6 +17,7 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
+    "fakeredis[lua]>=2.26",
     "httpx>=0.28",
     "mypy>=1.13",
     "pytest>=8.3",

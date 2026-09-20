@@ -10,7 +10,7 @@ from app.config import Settings, get_settings
 from app.errors import RateLimitedError
 from app.observability import describe_analysis
 from app.pipeline.analysis import analyze_resume
-from app.ratelimit import SlidingWindowLimiter, build_limiter, client_key, monotonic_now
+from app.ratelimit import Limiter, build_limiter, client_key, monotonic_now
 from app.schemas.analysis import AnalysisResult
 from app.schemas.errors import ErrorResponse
 from app.upload import read_validated_upload
@@ -20,7 +20,7 @@ logger = logging.getLogger("resume.analysis")
 
 
 @lru_cache(maxsize=1)
-def get_limiter() -> SlidingWindowLimiter:
+def get_limiter() -> Limiter:
     return build_limiter(get_settings())
 
 
