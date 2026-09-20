@@ -1,0 +1,131 @@
+version: "2026.09.1"
+
+roles:
+  - name: Software Engineer
+    skills:
+      - seed:python
+      - seed:java
+      - seed:cpp
+      - seed:git
+      - seed:dsa
+      - seed:oop
+      - seed:rest-api
+      - seed:unit-testing
+      - seed:sql
+      - seed:code-review
+      - seed:agile
+      - seed:system-design
+
+  - name: Frontend Developer
+    skills:
+      - seed:javascript
+      - seed:typescript
+      - seed:html
+      - seed:css
+      - seed:react
+      - seed:nextjs
+      - seed:vuejs
+      - seed:angular
+      - seed:tailwind
+      - seed:responsive-design
+      - seed:accessibility
+      - seed:figma
+      - seed:git
+
+  - name: Backend Developer
+    skills:
+      - seed:python
+      - seed:java
+      - seed:nodejs
+      - seed:django
+      - seed:flask
+      - seed:fastapi
+      - seed:express
+      - seed:spring-boot
+      - seed:rest-api
+      - seed:graphql
+      - seed:postgresql
+      - seed:sql
+      - seed:redis
+      - seed:microservices
+      - seed:docker
+
+  - name: Data Analyst
+    skills:
+      - seed:sql
+      - seed:python
+      - seed:excel
+      - seed:pandas
+      - seed:data-analysis
+      - seed:data-visualisation
+      - seed:statistics
+      - seed:r
+      - seed:database-design
+
+  - name: Machine Learning Engineer
+    skills:
+      - seed:python
+      - seed:machine-learning
+      - seed:deep-learning
+      - seed:scikit-learn
+      - seed:tensorflow
+      - seed:pytorch
+      - seed:pandas
+      - seed:numpy
+      - seed:nlp
+      - seed:computer-vision
+      - seed:statistics
+
+  - name: DevOps Engineer
+    skills:
+      - seed:docker
+      - seed:kubernetes
+      - seed:cicd
+      - seed:linux
+      - seed:aws
+      - seed:azure
+      - seed:gcp
+      - seed:terraform
+      - seed:nginx
+      - seed:git
+
+  - name: Mobile Developer
+    skills:
+      - seed:kotlin
+      - seed:swift
+      - seed:dart
+      - seed:flutter
+      - seed:react-native
+      - seed:java
+      - seed:firebase
+      - seed:rest-api
+
+  - name: UI/UX Designer
+    skills:
+      - seed:figma
+      - seed:ui-ux
+      - seed:wireframing
+      - seed:photoshop
+      - seed:illustrator
+      - seed:canva
+      - seed:accessibility
+      - seed:responsive-design
+
+  - name: Cybersecurity Analyst
+    skills:
+      - seed:cybersecurity
+      - seed:pentesting
+      - seed:networking
+      - seed:cryptography
+      - seed:linux
+      - seed:python
+
+  - name: QA Engineer
+    skills:
+      - seed:unit-testing
+      - seed:web-scraping
+      - seed:python
+      - seed:javascript
+      - seed:agile
+      - seed:cicd
+      - seed:git

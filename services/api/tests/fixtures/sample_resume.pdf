@@ -1,0 +1,46 @@
+%PDF-1.4
+%‚„œ”
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>
+endobj
+4 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>
+endobj
+5 0 obj
+<< /Length 869 >>
+stream
+BT
+/F1 16 Tf 1 0 0 1 72 720 Tm (Priya Fernando) Tj
+/F1 10 Tf 1 0 0 1 72 700 Tm (priya.f@example.com  |  +94 77 123 4567  |  linkedin.com/in/priyaf) Tj
+/F1 12 Tf 1 0 0 1 72 665 Tm (EDUCATION) Tj
+/F1 10 Tf 1 0 0 1 72 648 Tm (BSc Computer Science, University of Colombo, 2023 - 2027) Tj
+/F1 10 Tf 1 0 0 1 72 634 Tm (Relevant coursework: Data Structures, Databases, Web Development) Tj
+/F1 12 Tf 1 0 0 1 72 600 Tm (WORK HISTORY) Tj
+/F1 10 Tf 1 0 0 1 72 583 Tm (Software Engineering Intern, Reddy Labs, Jun 2026 - Aug 2026) Tj
+/F1 10 Tf 1 0 0 1 86 569 Tm (- Worked on the reporting dashboard) Tj
+/F1 10 Tf 1 0 0 1 86 555 Tm (- Built REST endpoints in Python and Flask) Tj
+/F1 10 Tf 1 0 0 1 86 541 Tm (- Helped with testing and code review) Tj
+/F1 12 Tf 1 0 0 1 72 507 Tm (SKILLS) Tj
+/F1 10 Tf 1 0 0 1 72 490 Tm (Python, JavaScript, React, SQL, PostgreSQL, Git, Docker) Tj
+ET
+endstream
+endobj
+xref
+0 6
+0000000000 65535 f 
+0000000015 00000 n 
+0000000064 00000 n 
+0000000121 00000 n 
+0000000247 00000 n 
+0000000344 00000 n 
+trailer
+<< /Size 6 /Root 1 0 R >>
+startxref
+1264
+%%EOF

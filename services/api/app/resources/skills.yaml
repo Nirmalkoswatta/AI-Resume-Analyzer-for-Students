@@ -1,0 +1,402 @@
+source: seed
+version: "2026.09.1"
+
+skills:
+  - name: Python
+    id: seed:python
+    category: Programming languages
+    aliases: [python3, py]
+  - name: JavaScript
+    id: seed:javascript
+    category: Programming languages
+    aliases: [js, ecmascript, es6]
+  - name: TypeScript
+    id: seed:typescript
+    category: Programming languages
+    aliases: [ts]
+  - name: Java
+    id: seed:java
+    category: Programming languages
+  - name: C
+    id: seed:c
+    category: Programming languages
+    strict: true
+  - name: C++
+    id: seed:cpp
+    category: Programming languages
+    aliases: [cpp, cplusplus]
+    strict: true
+  - name: "C#"
+    id: seed:csharp
+    category: Programming languages
+    aliases: [csharp, "c sharp"]
+    strict: true
+  - name: Go
+    id: seed:go
+    category: Programming languages
+    aliases: [golang]
+    strict: true
+  - name: Rust
+    id: seed:rust
+    category: Programming languages
+  - name: Kotlin
+    id: seed:kotlin
+    category: Programming languages
+  - name: Swift
+    id: seed:swift
+    category: Programming languages
+  - name: PHP
+    id: seed:php
+    category: Programming languages
+  - name: Ruby
+    id: seed:ruby
+    category: Programming languages
+  - name: Scala
+    id: seed:scala
+    category: Programming languages
+  - name: R
+    id: seed:r
+    category: Programming languages
+    strict: true
+  - name: MATLAB
+    id: seed:matlab
+    category: Programming languages
+  - name: Dart
+    id: seed:dart
+    category: Programming languages
+
+  - name: HTML
+    id: seed:html
+    category: Web fundamentals
+    aliases: [html5]
+  - name: CSS
+    id: seed:css
+    category: Web fundamentals
+    aliases: [css3]
+  - name: Sass
+    id: seed:sass
+    category: Web fundamentals
+    aliases: [scss]
+  - name: Tailwind CSS
+    id: seed:tailwind
+    category: Web fundamentals
+    aliases: [tailwind, tailwindcss]
+  - name: Bootstrap
+    id: seed:bootstrap
+    category: Web fundamentals
+  - name: Accessibility
+    id: seed:accessibility
+    category: Web fundamentals
+    aliases: [a11y, wcag]
+  - name: Responsive design
+    id: seed:responsive-design
+    category: Web fundamentals
+
+  - name: React
+    id: seed:react
+    category: Web frameworks
+    aliases: [reactjs, "react js"]
+  - name: Next.js
+    id: seed:nextjs
+    category: Web frameworks
+    aliases: [nextjs, "next js"]
+  - name: Vue.js
+    id: seed:vuejs
+    category: Web frameworks
+    aliases: [vue, vuejs]
+  - name: Angular
+    id: seed:angular
+    category: Web frameworks
+    aliases: [angularjs]
+  - name: Svelte
+    id: seed:svelte
+    category: Web frameworks
+    aliases: [sveltekit]
+  - name: Node.js
+    id: seed:nodejs
+    category: Web frameworks
+    aliases: [node, nodejs, "node js"]
+  - name: Express
+    id: seed:express
+    category: Web frameworks
+    aliases: [expressjs, "express js"]
+  - name: Django
+    id: seed:django
+    category: Web frameworks
+  - name: Flask
+    id: seed:flask
+    category: Web frameworks
+  - name: FastAPI
+    id: seed:fastapi
+    category: Web frameworks
+    aliases: ["fast api"]
+  - name: Spring Boot
+    id: seed:spring-boot
+    category: Web frameworks
+    aliases: [spring, springboot]
+  - name: Laravel
+    id: seed:laravel
+    category: Web frameworks
+  - name: ASP.NET
+    id: seed:aspnet
+    category: Web frameworks
+    aliases: [aspnet, "asp net", dotnet, ".net"]
+  - name: React Native
+    id: seed:react-native
+    category: Web frameworks
+    aliases: [reactnative]
+  - name: Flutter
+    id: seed:flutter
+    category: Web frameworks
+
+  - name: SQL
+    id: seed:sql
+    category: Databases
+  - name: PostgreSQL
+    id: seed:postgresql
+    category: Databases
+    aliases: [postgres, psql]
+  - name: MySQL
+    id: seed:mysql
+    category: Databases
+  - name: SQLite
+    id: seed:sqlite
+    category: Databases
+  - name: MongoDB
+    id: seed:mongodb
+    category: Databases
+    aliases: [mongo]
+  - name: Redis
+    id: seed:redis
+    category: Databases
+  - name: Microsoft SQL Server
+    id: seed:mssql
+    category: Databases
+    aliases: [sql server, mssql, "t sql", tsql]
+  - name: Oracle Database
+    id: seed:oracle-db
+    category: Databases
+    aliases: [oracle, plsql, "pl sql"]
+  - name: Firebase
+    id: seed:firebase
+    category: Databases
+  - name: Database design
+    id: seed:database-design
+    category: Databases
+    aliases: [data modelling, data modeling, normalisation, normalization, er diagrams]
+
+  - name: Git
+    id: seed:git
+    category: Tooling and DevOps
+  - name: GitHub
+    id: seed:github
+    category: Tooling and DevOps
+  - name: GitLab
+    id: seed:gitlab
+    category: Tooling and DevOps
+  - name: Docker
+    id: seed:docker
+    category: Tooling and DevOps
+    aliases: [containerisation, containerization]
+  - name: Kubernetes
+    id: seed:kubernetes
+    category: Tooling and DevOps
+    aliases: [k8s]
+  - name: CI/CD
+    id: seed:cicd
+    category: Tooling and DevOps
+    aliases: [ci cd, continuous integration, continuous deployment, github actions, jenkins]
+  - name: Linux
+    id: seed:linux
+    category: Tooling and DevOps
+    aliases: [ubuntu, unix, bash scripting]
+  - name: AWS
+    id: seed:aws
+    category: Tooling and DevOps
+    aliases: [amazon web services, ec2, s3, lambda]
+  - name: Microsoft Azure
+    id: seed:azure
+    category: Tooling and DevOps
+    aliases: [azure]
+  - name: Google Cloud
+    id: seed:gcp
+    category: Tooling and DevOps
+    aliases: [gcp, google cloud platform]
+  - name: Terraform
+    id: seed:terraform
+    category: Tooling and DevOps
+  - name: Nginx
+    id: seed:nginx
+    category: Tooling and DevOps
+  - name: Postman
+    id: seed:postman
+    category: Tooling and DevOps
+
+  - name: REST APIs
+    id: seed:rest-api
+    category: Software engineering
+    aliases: [rest, restful, "rest api", "api development", web services]
+  - name: GraphQL
+    id: seed:graphql
+    category: Software engineering
+  - name: Unit testing
+    id: seed:unit-testing
+    category: Software engineering
+    aliases: [pytest, jest, junit, testing, test automation, tdd]
+  - name: Object-oriented programming
+    id: seed:oop
+    category: Software engineering
+    aliases: [oop, object oriented programming, object oriented design]
+  - name: Data structures and algorithms
+    id: seed:dsa
+    category: Software engineering
+    aliases: [data structures, algorithms, dsa]
+  - name: Agile
+    id: seed:agile
+    category: Software engineering
+    aliases: [scrum, kanban, sprint planning]
+  - name: Code review
+    id: seed:code-review
+    category: Software engineering
+  - name: Microservices
+    id: seed:microservices
+    category: Software engineering
+  - name: System design
+    id: seed:system-design
+    category: Software engineering
+    aliases: [software architecture]
+  - name: Web scraping
+    id: seed:web-scraping
+    category: Software engineering
+    aliases: [beautifulsoup, scrapy, selenium]
+
+  - name: Machine learning
+    id: seed:machine-learning
+    category: Data and machine learning
+    aliases: [ml, supervised learning, unsupervised learning]
+  - name: Deep learning
+    id: seed:deep-learning
+    category: Data and machine learning
+    aliases: [neural networks, cnn, rnn]
+  - name: Natural language processing
+    id: seed:nlp
+    category: Data and machine learning
+    aliases: [nlp, text mining]
+  - name: Computer vision
+    id: seed:computer-vision
+    category: Data and machine learning
+    aliases: [opencv, image processing]
+  - name: scikit-learn
+    id: seed:scikit-learn
+    category: Data and machine learning
+    aliases: [sklearn, scikit learn]
+  - name: TensorFlow
+    id: seed:tensorflow
+    category: Data and machine learning
+    aliases: [keras]
+  - name: PyTorch
+    id: seed:pytorch
+    category: Data and machine learning
+  - name: pandas
+    id: seed:pandas
+    category: Data and machine learning
+  - name: NumPy
+    id: seed:numpy
+    category: Data and machine learning
+  - name: Data analysis
+    id: seed:data-analysis
+    category: Data and machine learning
+    aliases: [data analytics, exploratory data analysis, eda]
+  - name: Data visualisation
+    id: seed:data-visualisation
+    category: Data and machine learning
+    aliases: [data visualization, matplotlib, seaborn, plotly, tableau, power bi]
+  - name: Statistics
+    id: seed:statistics
+    category: Data and machine learning
+    aliases: [statistical analysis, hypothesis testing, regression analysis]
+  - name: Excel
+    id: seed:excel
+    category: Data and machine learning
+    aliases: [microsoft excel, spreadsheets, pivot tables, vlookup]
+
+  - name: Figma
+    id: seed:figma
+    category: Design
+  - name: UI/UX design
+    id: seed:ui-ux
+    category: Design
+    aliases: [ui design, ux design, "ui ux", user experience, user interface design]
+  - name: Adobe Photoshop
+    id: seed:photoshop
+    category: Design
+    aliases: [photoshop]
+  - name: Adobe Illustrator
+    id: seed:illustrator
+    category: Design
+    aliases: [illustrator]
+  - name: Canva
+    id: seed:canva
+    category: Design
+  - name: Wireframing
+    id: seed:wireframing
+    category: Design
+    aliases: [prototyping, mockups]
+
+  - name: Cybersecurity
+    id: seed:cybersecurity
+    category: Security and networking
+    aliases: [information security, infosec, network security]
+  - name: Penetration testing
+    id: seed:pentesting
+    category: Security and networking
+    aliases: [pen testing, ethical hacking, vulnerability assessment]
+  - name: Networking
+    id: seed:networking
+    category: Security and networking
+    aliases: [tcp ip, dns, computer networks]
+  - name: Cryptography
+    id: seed:cryptography
+    category: Security and networking
+    aliases: [encryption]
+
+  - name: Communication
+    id: seed:communication
+    category: Professional skills
+    aliases: [written communication, verbal communication, presentation skills]
+  - name: Teamwork
+    id: seed:teamwork
+    category: Professional skills
+    aliases: [collaboration, team player, cross functional collaboration]
+  - name: Leadership
+    id: seed:leadership
+    category: Professional skills
+    aliases: [team lead, mentoring, mentorship]
+  - name: Problem solving
+    id: seed:problem-solving
+    category: Professional skills
+    aliases: [analytical thinking, critical thinking]
+  - name: Time management
+    id: seed:time-management
+    category: Professional skills
+    aliases: [organisation, organization, prioritisation, prioritization]
+  - name: Project management
+    id: seed:project-management
+    category: Professional skills
+    aliases: [jira, trello, asana, stakeholder management]
+  - name: Public speaking
+    id: seed:public-speaking
+    category: Professional skills
+    aliases: [presenting]
+  - name: Customer service
+    id: seed:customer-service
+    category: Professional skills
+    aliases: [client facing, customer support]
+  - name: Research
+    id: seed:research
+    category: Professional skills
+    aliases: [literature review, academic research]
+  - name: Technical writing
+    id: seed:technical-writing
+    category: Professional skills
+    aliases: [documentation, report writing]

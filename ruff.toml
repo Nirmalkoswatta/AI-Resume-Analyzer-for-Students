@@ -1,0 +1,7 @@
+line-length = 100
+target-version = "py312"
+extend-exclude = ["services/api"]
+
+[lint]
+select = ["E", "F", "I", "N", "UP", "B", "SIM", "RUF", "ANN", "ARG", "C4", "PTH", "TID"]
+ignore = ["ANN401"]
